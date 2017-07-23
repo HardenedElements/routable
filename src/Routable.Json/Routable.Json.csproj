@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <PackageIconUrl>http://www.hardenedelements.com/images/he-icon.png</PackageIconUrl>
+    <PackageProjectUrl>https://www.hardenedelements.com/</PackageProjectUrl>
+    <PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
+    <Copyright>Copyright 2017 - Midnight Source Inc.</Copyright>
+    <PackageTags>routable.json,routable,json,routing,http</PackageTags>
+    <Authors>Hardened Elements</Authors>
+    <Company>Hardened Elements</Company>
+    <Description>Add JSON support to your Routable project</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Routable\Routable.csproj" />
+  </ItemGroup>
+</Project>
