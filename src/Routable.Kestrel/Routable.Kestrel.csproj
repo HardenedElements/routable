@@ -2,8 +2,8 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard1.3</TargetFramework>
     <PackageIconUrl>http://www.hardenedelements.com/images/he-icon.png</PackageIconUrl>
-    <PackageProjectUrl>https://www.hardenedelements.com/</PackageProjectUrl>
-    <PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/HardenedElements/routable</PackageProjectUrl>
+		<PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
     <Copyright>Copyright 2017 - Midnight Source Inc.</Copyright>
     <PackageTags>routable.kestrel,routable,kestrel,routing,http</PackageTags>
     <Authors>Hardened Elements</Authors>
