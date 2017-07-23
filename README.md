@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/HardenedElements/routable.svg?branch=master)](https://travis-ci.org/HardenedElements/routable) [![NuGet](https://img.shields.io/nuget/dt/Routable.svg)](https://preview.nuget.org/packages/Routable)
+[![Build Status](https://travis-ci.org/HardenedElements/routable.svg)](https://travis-ci.org/HardenedElements/routable) [![NuGet](https://img.shields.io/nuget/dt/Routable.svg)](https://preview.nuget.org/packages/Routable)
 
 Routable
 =======
