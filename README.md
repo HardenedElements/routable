@@ -12,10 +12,10 @@ Routable is a collection of libraries. First, you got your platform agnostic bas
 
 Library | NuGet Download
 ------- | --------------
-Routable | [![NuGet](https://img.shields.io/nuget/dt/Routable.svg)](https://preview.nuget.org/packages/Routable)
-Routable.Kestrel | [![NuGet](https://img.shields.io/nuget/dt/Routable.Kestrel.svg)](https://preview.nuget.org/packages/Routable.Kestrel)
-Routable.Json | [![NuGet](https://img.shields.io/nuget/dt/Routable.Json.svg)](https://preview.nuget.org/packages/Routable.Json)
-Routable.Views.Simple | [![NuGet](https://img.shields.io/nuget/dt/Routable.Views.Simple.svg)](https://preview.nuget.org/packages/Routable.Views.Simple)
+Routable | [![NuGet](https://img.shields.io/nuget/v/Routable.svg)](https://preview.nuget.org/packages/Routable)
+Routable.Kestrel | [![NuGet](https://img.shields.io/nuget/v/Routable.Kestrel.svg)](https://preview.nuget.org/packages/Routable.Kestrel)
+Routable.Json | [![NuGet](https://img.shields.io/nuget/v/Routable.Json.svg)](https://preview.nuget.org/packages/Routable.Json)
+Routable.Views.Simple | [![NuGet](https://img.shields.io/nuget/v/Routable.Views.Simple.svg)](https://preview.nuget.org/packages/Routable.Views.Simple)
 
 ## Examples (targeting Kestrel)
 Using a bit of creative license, we'll be using ```Routable.Kestrel``` as a companion to these examples, very little changes with other platforms (eg. change *kestrel* to *my favorite platform*).
