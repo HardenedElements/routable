@@ -10,6 +10,13 @@ Routable is governed by three simple rules. First, the base library is simple an
 ## Libraries
 Routable is a collection of libraries. First, you got your platform agnostic base library - that's ```Routable```. Then you have your simple *view* support - that's ```Routable.Views.Simple```. JSON support? Yeah, we integrate JSON.NET in ```Routable.Json```. And finally, you're going to need at least one platform integration to get started - we chose Kestrel because it's what we use the most; you can find that under ```Routable.Kestrel```. There are other platforms in the wind, but we haven't published those quite yet, they need some polishing up.
 
+Library | NuGet Download
+------- | --------------
+Routable | [![NuGet](https://img.shields.io/nuget/dt/Routable.svg)](https://preview.nuget.org/packages/Routable)
+Routable.Kestrel | [![NuGet](https://img.shields.io/nuget/dt/Routable.Kestrel.svg)](https://preview.nuget.org/packages/Routable.Kestrel)
+Routable.Json | [![NuGet](https://img.shields.io/nuget/dt/Routable.Json.svg)](https://preview.nuget.org/packages/Routable.Json)
+Routable.Views.Simple | [![NuGet](https://img.shields.io/nuget/dt/Routable.Views.Simple.svg)](https://preview.nuget.org/packages/Routable.Views.Simple)
+
 ## Examples (targeting Kestrel)
 Using a bit of creative license, we'll be using ```Routable.Kestrel``` as a companion to these examples, very little changes with other platforms (eg. change *kestrel* to *my favorite platform*).
 ### Registration
