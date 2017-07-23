@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/HardenedElements/routable.svg?branch=master)](https://travis-ci.org/HardenedElements/routable) [![NuGet](https://img.shields.io/nuget/dt/Routable.svg)](https://preview.nuget.org/packages/Routable)
+
 Routable
 =======
 Routable is a simple, easy to use, request routing library. It is platform agnostic and designed to easily integrate with whatever platform you prefer. Support for Microsoft Kestrel is provided out the gate by ```Routable.Kestrel```, making routable a must-have for multi-platform web services and applications.
