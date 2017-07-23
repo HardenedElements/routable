@@ -2,8 +2,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
     <PackageIconUrl>http://www.hardenedelements.com/images/he-icon.png</PackageIconUrl>
-		<PackageProjectUrl>https://github.com/HardenedElements/routable</PackageProjectUrl>
-		<PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/HardenedElements/routable</PackageProjectUrl>
+    <PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
     <Copyright>Copyright 2017 - Midnight Source Inc.</Copyright>
     <PackageTags>routable.views.simple,routable.views,routable,views,routing,http</PackageTags>
     <Authors>Hardened Elements</Authors>
@@ -11,6 +11,7 @@
     <Description>Use Routable with simple model-view support</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
