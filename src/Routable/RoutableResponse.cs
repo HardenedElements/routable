@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -64,10 +64,14 @@ namespace Routable
 			if(value == null) {
 				return Context.Options.EmptyResponseHandler(Context, null);
 			} else {
-				// TODO: add means of calculating type distance and caching the results.
-				if(Context.Options.ResponseTypeHandlers.TryGetValue(typeof(T), out var handler) == false && Context.Options.ResponseTypeHandlers.TryGetValue(typeof(string), out handler) == false) {
-					// TODO: add logging.
-					return Context.Options.EmptyResponseHandler(Context, null);
+				if(Context.Options.ResponseTypeHandlers.TryGetHandler(typeof(T), out var handler) == false) {
+					if(Context.Options.DefaultResponseHandler != null) {
+						handler = Context.Options.DefaultResponseHandler;
+					} else if(Context.Options.EmptyResponseHandler != null) {
+						handler = Context.Options.EmptyResponseHandler;
+					} else {
+						throw new UnhandledResponseTypeException(typeof(T));
+					}
 				}
 
 				return handler(Context, value);

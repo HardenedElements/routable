@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -29,7 +29,7 @@ namespace Routable
 		/// <summary>
 		/// Handlers for responses of various types.
 		/// </summary>
-		public virtual IDictionary<Type, ResponseTypeHandler<TContext, TRequest, TResponse>> ResponseTypeHandlers { get; } = new Dictionary<Type, ResponseTypeHandler<TContext, TRequest, TResponse>>();
+		public virtual ResponseTypeHandlerCollection<TContext, TRequest, TResponse> ResponseTypeHandlers { get; } = new ResponseTypeHandlerCollection<TContext, TRequest, TResponse>();
 		/// <summary>
 		/// Handles empty responses.
 		/// </summary>
@@ -131,6 +131,7 @@ namespace Routable
 		public void ClearMimeTypes() => MimeTypes.Clear();
 		private void AddDefaultResponseTypeHandlers()
 		{
+			ResponseTypeHandlers.Add(typeof(object), DefaultResponseTypeHandlers.StringResponseTypeHandler);
 			ResponseTypeHandlers.Add(typeof(string), DefaultResponseTypeHandlers.StringResponseTypeHandler);
 			ResponseTypeHandlers.Add(typeof(byte[]), DefaultResponseTypeHandlers.ByteArrayResponseTypeHandler);
 		}
