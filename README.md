@@ -28,7 +28,6 @@ public sealed class Startup
 	public Startup(IHostingEnvironment environment) { }
 	public void Configure(IApplicationBuilder builder) => builder.UseRoutable(options => {
 		options
-		.UseSimpleDefaults()
 		.WithJsonSupport()
 		.UseSimpleViews(_ => _.AddSearchPath("views").OnUnresolvedModelValue((type, expr, paths, model) => $"[ERR! ({expr})]"))
 		.AddRouting(new MyRouting(options))
