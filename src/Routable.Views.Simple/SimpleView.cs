@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,15 +17,14 @@ namespace Routable.Views.Simple
 		private static Regex ModelPattern = new Regex(@"\@Model(\.([\@]*[\w]+))+", RegexOptions.Compiled | RegexOptions.Multiline);
 		private static Regex ModelConditionalPattern = new Regex(@"@IfSet\((?<expr>(\.([\@]*[\w]+))*)\)(?<body>(.*?\n.*?)*?)@EndIfSet", RegexOptions.Compiled | RegexOptions.Singleline);
 		private SimpleViewOptions<TContext, TRequest, TResponse> Options;
-		private string ViewPath;
+		private string ViewContent;
 		public string MimeType { get; set; }
 
-		private SimpleView(SimpleViewOptions<TContext, TRequest, TResponse> options, string path)
+		private SimpleView(SimpleViewOptions<TContext, TRequest, TResponse> options, string mimeType, string viewContent)
 		{
 			Options = options;
-			ViewPath = path;
-
-			MimeType = options.RoutableOptions.TryGetMimeType(Path.GetExtension(path), out var mimeType) ? mimeType : "text/html";
+			MimeType = mimeType;
+			ViewContent = viewContent;
 		}
 
 		private IEnumerable<string> GetModelMethodComponents(Group group)
@@ -34,7 +33,7 @@ namespace Routable.Views.Simple
 				yield return capture.Value;
 			}
 		}
-		private bool TryGetModelValue(object model, IEnumerable<string> fields, out object value)
+		private bool TryGetModelValue(object model, IEnumerable<string> fields, out string value)
 		{
 			var current = model;
 			while(fields.Any() == true && current != null) {
@@ -63,7 +62,7 @@ namespace Routable.Views.Simple
 
 			// make sure we went through all of the fields.
 			if(current != model && fields.Any() == false) {
-				value = current;
+				value = current?.ToString() ?? "";
 				return true;
 			}
 
@@ -78,13 +77,12 @@ namespace Routable.Views.Simple
 		/// <returns>The rendered view</returns>
 		public string Render(object model)
 		{
-			// TODO: add support for more model and view actions.
 			var steps = new RenderStep[] {
 				RenderStepRemoveConditionals,
 				RenderStepResolveModel
 			};
-			var content = File.ReadAllText(ViewPath);
 
+			var content = ViewContent;
 			foreach(var step in steps) {
 				content = step(content, model);
 			}
@@ -110,11 +108,11 @@ namespace Routable.Views.Simple
 				var modelProperties = GetModelMethodComponents(match.Groups[2]);
 
 				// get value from model.
-				if(TryGetModelValue(model, modelProperties, out var value) == false) {
-					return Options.UnresolvedModelValueError?.Invoke(MimeType, match.Value, modelProperties, model) ?? $"[ERROR: unable to resolve model ({match.Value})]";
+				if(TryGetModelValue(model, modelProperties, out var value) == false && Options.TryResolveUnresolvedModelKey(MimeType, match.Value, modelProperties, model, out value) == false) {
+					return $"[ERROR: unable to resolve model ({match.Value})]";
 				} else {
 					// TODO: consider if we can use response type handlers to do something cute here (eg. convert objects to JSON :))
-					return value?.ToString() ?? "";
+					return value ?? "";
 				}
 			});
 		}
@@ -134,19 +132,20 @@ namespace Routable.Views.Simple
 			}
 		}
 
-		public static SimpleView<TContext, TRequest, TResponse> Find(SimpleViewOptions<TContext, TRequest, TResponse> options, string name)
+		public static async Task<SimpleView<TContext, TRequest, TResponse>> Find(SimpleViewOptions<TContext, TRequest, TResponse> options, string viewName)
 		{
-			var testPaths = new[] { name }
-			.SelectMany(pattern => options.ViewExtensions.Select(ext => $"{pattern}{ext}"))
-			.SelectMany(pattern => options.SearchPaths.Select(searchPath => Path.Combine(searchPath, pattern)));
-
-			foreach(var path in testPaths) {
-				if(File.Exists(path)) {
-					return new SimpleView<TContext, TRequest, TResponse>(options, path);
-				}
+			// resolve view.
+			var resolveViewArgs = new ResolveViewArgs { Name = viewName };
+			await options.ResolveView(resolveViewArgs);
+			if(resolveViewArgs.Success == false) {
+				throw new SimpleViewNotFoundException(viewName);
 			}
 
-			throw new SimpleViewNotFoundException(name);
+			// read view content and return a view.
+			using(var stream = await resolveViewArgs.GetStream())
+			using(var reader = new StreamReader(stream)) {
+				return new SimpleView<TContext, TRequest, TResponse>(options, resolveViewArgs.MimeType, await reader.ReadToEndAsync());
+			}
 		}
 	}
 }

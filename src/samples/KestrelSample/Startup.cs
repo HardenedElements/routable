@@ -21,7 +21,7 @@ namespace RoutableTest
 			.WithJsonSupport()
 
 			// demo: add support for views.
-			.UseSimpleViews(_ => _.AddSearchPath("views").OnUnresolvedModelValue((type, expr, paths, model) => $"[ERR! ({expr})]"))
+			.UseFileSystemViews(_ => _.AddSearchPath("views").OnUnresolvedModelValue((type, expr, paths, model) => $"[ERR! ({expr})]"))
 
 			// demo: execute this route on all requests, logging the request to stderr.
 			.AddRouting(new KestrelRouting(options) {

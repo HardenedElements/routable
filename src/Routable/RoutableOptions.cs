@@ -43,7 +43,8 @@ namespace Routable
 		/// Handles unhandled errors.
 		/// </summary>
 		public virtual AsyncRoutableErrorAction<TContext, TRequest, TResponse> ErrorHandler { get; set; }
-		private Dictionary<Type, object> OptionDetails = new Dictionary<Type, object>();
+		private Dictionary<Type, object> FeatureOptions = new Dictionary<Type, object>();
+		public ILogger Logger { get; protected set; } = new DefaultConsoleLogger();
 
 		protected RoutableOptions()
 		{
@@ -78,28 +79,36 @@ namespace Routable
 			return this;
 		}
 		/// <summary>
+		/// Set a different logger than the default.
+		/// </summary>
+		public RoutableOptions<TContext, TRequest, TResponse> UseLogger(ILogger logger)
+		{
+			Logger = logger;
+			return this;
+		}
+		/// <summary>
 		/// Get detailed options of an arbitrary type to make available to routable requests and components.
 		/// </summary>
-		/// <typeparam name="TOptionDetails">A plain old class</typeparam>
+		/// <typeparam name="TFeatureOptions">A plain old class</typeparam>
 		/// <param name="details">A plain old class representing configuration items</param>
 		/// <returns>Indicates whether or not the details exist</returns>
-		public bool TryGetOptionDetails<TOptionDetails>(out TOptionDetails details)
-			where TOptionDetails : class
+		public bool TryGetFeatureOptions<TFeatureOptions>(out TFeatureOptions details)
+			where TFeatureOptions : class
 		{
-			if(OptionDetails.TryGetValue(typeof(TOptionDetails), out var value) == false) {
+			if(FeatureOptions.TryGetValue(typeof(TFeatureOptions), out var value) == false) {
 				details = null;
 				return false;
 			} else {
-				details = value as TOptionDetails;
+				details = value as TFeatureOptions;
 				return true;
 			}
 		}
 		/// <summary>
 		/// Set detailed options of an arbitrary type to make available to routable requests and components.
 		/// </summary>
-		/// <typeparam name="TOptionDetails">A plain old class</typeparam>
+		/// <typeparam name="TFeatureOptions">A plain old class</typeparam>
 		/// <param name="details">A plain old class representing configuration items</param>
-		public void SetOptionDetails<TOptionDetails>(TOptionDetails details) => OptionDetails[typeof(TOptionDetails)] = details;
+		public void SetFeatureOptions<TFeatureOptions>(TFeatureOptions details) => FeatureOptions[typeof(TFeatureOptions)] = details;
 		/// <summary>
 		/// Add mime type for a given file extension.
 		/// </summary>
