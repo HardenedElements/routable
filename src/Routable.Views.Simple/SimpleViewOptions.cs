@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -6,40 +6,49 @@ using System.Threading.Tasks;
 
 namespace Routable.Views.Simple
 {
-	public sealed class SimpleViewOptions<TContext, TRequest, TResponse>
+	public class ResolveViewArgs : EventArgs
+	{
+		public string Name { get; set; }
+		public string MimeType { get; set; }
+		public Func<Task<Stream>> GetStream { get; set; }
+		public bool Success { get; set; } = false;
+	}
+	public class UnresolvedModelKeyEventArgs : EventArgs
+	{
+		public string MimeType { get; set; }
+		public string Expression { get; set; }
+		public IEnumerable<string> PathComponents { get; set; }
+		public object Model { get; set; }
+		public bool Success { get; set; } = false;
+		public string Value { get; set; }
+	}
+	public abstract class SimpleViewOptions<TContext, TRequest, TResponse>
 			where TContext : RoutableContext<TContext, TRequest, TResponse>
 			where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 			where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
 		public RoutableOptions<TContext, TRequest, TResponse> RoutableOptions { get; private set; }
-		internal UnresolvedModelValueAction UnresolvedModelValueError { get; set; }
-		/// <summary>
-		/// List of paths to search for views.
-		/// </summary>
-		internal IList<string> SearchPaths { get; set; } = new List<string>();
-		internal IList<string> ViewExtensions { get; set; } = new List<string>();
-		
-		public SimpleViewOptions(RoutableOptions<TContext, TRequest, TResponse> options)
-		{
-			RoutableOptions = options;
-			AddViewExtension(".html");
-		}
+		public event EventHandler<UnresolvedModelKeyEventArgs> ResolveUnresolvedModelKey;
 
+		public SimpleViewOptions(RoutableOptions<TContext, TRequest, TResponse> options) => RoutableOptions = options;
 
-		public SimpleViewOptions<TContext, TRequest, TResponse> AddSearchPath(string path)
+		internal bool TryResolveUnresolvedModelKey(string mimeType, string expression, IEnumerable<string> pathComponents, object model, out string value)
 		{
-			SearchPaths.Add(Path.GetFullPath(path));
-			return this;
+			var args = new UnresolvedModelKeyEventArgs {
+				MimeType = mimeType,
+				Expression = expression,
+				PathComponents = pathComponents,
+				Model = model
+			};
+			ResolveUnresolvedModelKey?.Invoke(this, args);
+			if(args.Success == true) {
+				value = args.Value;
+				return true;
+			} else {
+				value = null;
+				return false;
+			}
 		}
-		public SimpleViewOptions<TContext, TRequest, TResponse> AddViewExtension(string extension)
-		{
-			ViewExtensions.Add(extension);
-			return this;
-		}
-		public SimpleViewOptions<TContext, TRequest, TResponse> OnUnresolvedModelValue(UnresolvedModelValueAction action)
-		{
-			UnresolvedModelValueError = action;
-			return this;
-		}
+		internal abstract Task ResolveView(ResolveViewArgs resolveViewArgs);
 	}
 }

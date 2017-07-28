@@ -29,7 +29,7 @@ public sealed class Startup
 	public void Configure(IApplicationBuilder builder) => builder.UseRoutable(options => {
 		options
 		.WithJsonSupport()
-		.UseSimpleViews(_ => _.AddSearchPath("views").OnUnresolvedModelValue((type, expr, paths, model) => $"[ERR! ({expr})]"))
+		.UseFileSystemViews(_ => _.AddSearchPath("views").OnUnresolvedModelValue((type, expr, paths, model) => $"[ERR! ({expr})]"))
 		.AddRouting(new MyRouting(options))
 		.AddRouting(new KestrelRouting(options) {
 			_ => _.Get("/meeseeks").Do(async (ctx, req, resp) => await resp.WriteAsync("Hi, I'm Mr. Meeseeks!")),
