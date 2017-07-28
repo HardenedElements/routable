@@ -8,19 +8,11 @@ using System.Threading.Tasks;
 
 namespace Routable
 {
-	public class RoutableOptions<TContext, TRequest, TResponse>
+	public abstract class RoutableOptions<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
-		/// <summary>
-		/// Display built-in error pages when things go wrong.
-		/// </summary>
-		public virtual bool UseBuiltinErrors { get; set; } = false;
-		/// <summary>
-		/// Issue a 404 error if the request was not handled by any route.
-		/// </summary>
-		public virtual bool TreatUnhandledRequestAsNotFound { get; set; } = false;
 		/// <summary>
 		/// String encoding to use around the routable framework. (default is UTF-8)
 		/// </summary>
@@ -53,21 +45,22 @@ namespace Routable
 		public virtual AsyncRoutableErrorAction<TContext, TRequest, TResponse> ErrorHandler { get; set; }
 		private Dictionary<Type, object> OptionDetails = new Dictionary<Type, object>();
 
-		public RoutableOptions()
+		protected RoutableOptions()
 		{
 			AddDefaultMimeTypes();
 			AddDefaultResponseTypeHandlers();
 		}
 
-		/// <summary>
-		/// A sane set of default values.
-		/// </summary>
-		public RoutableOptions<TContext, TRequest, TResponse> UseSimpleDefaults()
+		protected async Task<bool> InvokeRouting(TContext context)
 		{
-			UseBuiltinErrors = true;
-			TreatUnhandledRequestAsNotFound = true;
-			return this;
+			foreach(var route in Routing.SelectMany(_ => _.Routes).Where(_ => _.IsMatch(context))) {
+				if(await route.Invoke(context) == true) {
+					return true;
+				}
+			}
+			return false;
 		}
+
 		/// <summary>
 		/// Add a routing instance to handle requests.
 		/// </summary>
