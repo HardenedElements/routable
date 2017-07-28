@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using System;
 using System.Linq;
 
@@ -13,7 +13,7 @@ namespace Routable.Kestrel
 		public static IApplicationBuilder UseRoutable(this IApplicationBuilder @this, Action<RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse>> optionsSetter)
 		{
 			// set options.
-			var options = new RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse>();
+			var options = new KestrelRoutableOptions();
 			optionsSetter?.Invoke(options);
 
 			// when invoked, run routes.
@@ -21,9 +21,7 @@ namespace Routable.Kestrel
 				KestrelRoutableContext routableContext = null;
 				try {
 					routableContext = new KestrelRoutableContext(options, context);
-					var route = options.Routing.SelectMany(_ => _.Routes).FirstOrDefault(_ => _.IsMatch(routableContext));
-
-					if(route == null || await route.Invoke(routableContext) == false) {
+					if(await options.Invoke(routableContext) == false) {
 						await next();
 						return;
 					}

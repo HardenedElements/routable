@@ -1,4 +1,4 @@
-﻿using Routable.Patterns;
+using Routable.Patterns;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +13,7 @@ namespace Routable
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
-		protected AsyncBasicRouteAction<TContext, TRequest, TResponse> AsyncBasicRouteAction;
-		protected AsyncBypassableRouteAction<TContext, TRequest, TResponse> AsyncBypassableRouteAction;
-		protected AsyncNestedRouteAction<TContext, TRequest, TResponse> AsyncNestedRouteAction;
+		protected RouteAction<TContext, TRequest, TResponse> RouteAction;
 
 		private IList<RoutePattern<TContext, TRequest, TResponse>> _Patterns = new List<RoutePattern<TContext, TRequest, TResponse>>();
 		private IReadOnlyList<RoutePattern<TContext, TRequest, TResponse>> Patterns => (IReadOnlyList<RoutePattern<TContext, TRequest, TResponse>>)_Patterns;
@@ -33,56 +31,24 @@ namespace Routable
 		/// <returns>Task that indicates when the request completes, providing a value indicating whether this route was able to handle the request</returns>
 		public virtual async Task<bool> Invoke(TContext context)
 		{
-			if(AsyncBasicRouteAction != null) {
-				await AsyncBasicRouteAction(context, context.Request, context.Response);
-				return true;
-			} else if(AsyncBypassableRouteAction != null) {
-				return await AsyncBypassableRouteAction(context, context.Request, context.Response);
-			} else if(AsyncNestedRouteAction != null) {
-				var result = await AsyncNestedRouteAction(context, context.Request, context.Response);
-				return await InvokeNestedRouting(context, result);
-			} else {
+			if(RouteAction == null) {
 				return false;
+			} else {
+				return await RouteAction.Invoke(context);
 			}
-		}
-		private Task<bool> InvokeNestedRouting(TContext context, Routing<TContext, TRequest, TResponse> routing)
-		{
-			if(routing == null) {
-				return Task.FromResult(false);
-			}
-
-			var route = routing.FirstOrDefault(r => r.IsMatch(context));
-			if(route == null) {
-				return Task.FromResult(false);
-			}
-
-			return route.Invoke(context);
 		}
 
 		/// <summary>
 		/// Carry out an action when the route is invoked.
 		/// </summary>
-		public Route<TContext, TRequest, TResponse> Do(AsyncBasicRouteAction<TContext, TRequest, TResponse> action)
+		public Route<TContext, TRequest, TResponse> Do(RouteAction<TContext, TRequest, TResponse> action)
 		{
-			AsyncBasicRouteAction = action;
+			RouteAction = action;
 			return this;
 		}
-		/// <summary>
-		/// Carry out an action when the route is invoked.
-		/// </summary>
-		public Route<TContext, TRequest, TResponse> Try(AsyncBypassableRouteAction<TContext, TRequest, TResponse> action)
-		{
-			AsyncBypassableRouteAction = action;
-			return this;
-		}
-		/// <summary>
-		/// Carry out an action when the route is invoked.
-		/// </summary>
-		public Route<TContext, TRequest, TResponse> Nest(AsyncNestedRouteAction<TContext, TRequest, TResponse> action)
-		{
-			AsyncNestedRouteAction = action;
-			return this;
-		}
+		public Route<TContext, TRequest, TResponse> Do(Func<TContext, TRequest, TResponse, Task> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
+		public Route<TContext, TRequest, TResponse> Try(Func<TContext, TRequest, TResponse, Task<bool>> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
+		public Route<TContext, TRequest, TResponse> Nest(Func<TContext, TRequest, TResponse, Task<Routing<TContext, TRequest, TResponse>>> action) => Do((NestedRouteAction<TContext, TRequest, TResponse>)action);
 
 		/// <summary>
 		/// Restrict a route to a given pattern.
