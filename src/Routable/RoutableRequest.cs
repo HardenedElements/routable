@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -14,7 +14,7 @@ namespace Routable
 		/// <summary>
 		/// Context of this request.
 		/// </summary>
-		public RoutableContext<TContext, TRequest, TResponse> Context { get; private set; }
+		public TContext Context { get; private set; }
 		/// <summary>
 		/// Uri of this request.
 		/// </summary>
@@ -29,7 +29,7 @@ namespace Routable
 		/// </summary>
 		public virtual IReadOnlyDictionary<string, object> Parameters => (IReadOnlyDictionary<string, object>)_Parameters;
 
-		protected RoutableRequest(RoutableContext<TContext, TRequest, TResponse> context) => Context = context;
+		protected RoutableRequest(TContext context) => Context = context;
 
 		/// <summary>
 		/// Get the body of the request as a string.
@@ -79,7 +79,7 @@ namespace Routable
 		/// </summary>
 		public abstract TBody Body { get; }
 
-		protected RoutableRequest(RoutableContext<TContext, TRequest, TResponse> context) : base(context) { }
+		protected RoutableRequest(TContext context) : base(context) { }
 
 		public override string GetMethodAsString() => Method.ToString();
 	}

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -18,7 +18,7 @@ namespace Routable.Kestrel
 		long?,
 		Stream>
 	{
-		private Microsoft.AspNetCore.Http.HttpRequest PlatformRequest => ((KestrelRoutableContext)Context).PlatformContext.Request;
+		public Microsoft.AspNetCore.Http.HttpRequest PlatformRequest => Context.PlatformContext.Request;
 		public override string Method => PlatformRequest.Method;
 		private Uri _Uri;
 		public override Uri Uri

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,8 +44,7 @@ namespace Routable.Kestrel
 		long?,
 		Stream>
 	{
-		private Microsoft.AspNetCore.Http.HttpResponse PlatformResponse => ((KestrelRoutableContext)Context).PlatformContext.Response;
-
+		public Microsoft.AspNetCore.Http.HttpResponse PlatformResponse => Context.PlatformContext.Response;
 		private AbstractResponseAttributes _Attributes;
 		public override AbstractResponseAttributes Attributes => _Attributes;
 		public override int Status { get => PlatformResponse.StatusCode; set => PlatformResponse.StatusCode = value; }
@@ -62,5 +61,10 @@ namespace Routable.Kestrel
 		}
 
 		public async override Task WriteAsync(Func<Stream, Task> writer) => await writer(Body);
+		public override Task Redirect(string location)
+		{
+			PlatformResponse.Redirect(location);
+			return Task.CompletedTask;
+		}
 	}
 }

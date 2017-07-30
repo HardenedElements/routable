@@ -40,14 +40,14 @@ namespace Routable
 		/// <summary>
 		/// Context of this request.
 		/// </summary>
-		public RoutableContext<TContext, TRequest, TResponse> Context { get; private set; }
+		public TContext Context { get; private set; }
 		/// <summary>
 		/// Platform agnostic response attributes
 		/// </summary>
 		public abstract AbstractResponseAttributes Attributes { get; }
 
 		private RoutableResponse() { }
-		internal RoutableResponse(RoutableContext<TContext, TRequest, TResponse> context) => Context = context;
+		internal RoutableResponse(TContext context) => Context = context;
 
 		/// <summary>
 		/// Write directly to the response stream.
@@ -77,6 +77,7 @@ namespace Routable
 				return handler(Context, value);
 			}
 		}
+		public abstract Task Redirect(string location);
 	}
 	public abstract class RoutableResponse<TContext, TRequest, TResponse, TStatus, TCookies, THeaders, TContentType, TContentLength, TBody> : RoutableResponse<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>
@@ -112,6 +113,6 @@ namespace Routable
 		/// </summary>
 		public abstract TBody Body { get; set; }
 
-		protected RoutableResponse(RoutableContext<TContext, TRequest, TResponse> context) : base(context) { }
+		protected RoutableResponse(TContext context) : base(context) { }
 	}
 }
