@@ -70,12 +70,6 @@ namespace Routable.Views.Simple
 			}
 			return output;
 		}
-		private string GetSourceKey(string source)
-		{
-			using(var digest = SHA256.Create()) {
-				return string.Join("", digest.ComputeHash(Encoding.UTF8.GetBytes(source)).Select(_ => _.ToString("X2")));
-			}
-		}
 		public Template<TContext, TRequest, TResponse> TryParse(string name, DateTime? lastModified, string source)
 		{
 			// check cache for template.
