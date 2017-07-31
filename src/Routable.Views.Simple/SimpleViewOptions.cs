@@ -10,12 +10,12 @@ namespace Routable.Views.Simple
 	{
 		public string Name { get; set; }
 		public string MimeType { get; set; }
+		public DateTime? LastModified { get; set; }
 		public Func<Task<Stream>> GetStream { get; set; }
 		public bool Success { get; set; } = false;
 	}
 	public class UnresolvedModelKeyEventArgs : EventArgs
 	{
-		public string MimeType { get; set; }
 		public string Expression { get; set; }
 		public IEnumerable<string> PathComponents { get; set; }
 		public object Model { get; set; }
@@ -29,13 +29,13 @@ namespace Routable.Views.Simple
 	{
 		public RoutableOptions<TContext, TRequest, TResponse> RoutableOptions { get; private set; }
 		public event EventHandler<UnresolvedModelKeyEventArgs> ResolveUnresolvedModelKey;
+		public bool IsUnresolvedModelExpressionExceptional { get; set; } = false;
 
 		public SimpleViewOptions(RoutableOptions<TContext, TRequest, TResponse> options) => RoutableOptions = options;
 
-		internal bool TryResolveUnresolvedModelKey(string mimeType, string expression, IEnumerable<string> pathComponents, object model, out string value)
+		internal bool TryResolveUnresolvedModelKey(string expression, IEnumerable<string> pathComponents, object model, out string value)
 		{
 			var args = new UnresolvedModelKeyEventArgs {
-				MimeType = mimeType,
 				Expression = expression,
 				PathComponents = pathComponents,
 				Model = model

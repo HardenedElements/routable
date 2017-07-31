@@ -49,10 +49,10 @@ namespace Routable.Views.Simple
 		/// <summary>
 		/// Add a callback to the list of event handlers used to try and resolve model values when traditional methods fail.
 		/// </summary>
-		public SimpleFileSystemViewOptions<TContext, TRequest, TResponse> OnUnresolvedModelValue(Func<string, string, IEnumerable<string>, object, string> action)
+		public SimpleFileSystemViewOptions<TContext, TRequest, TResponse> OnUnresolvedModelValue(Func<string, IEnumerable<string>, object, string> action)
 		{
 			ResolveUnresolvedModelKey += (_, args) => {
-				args.Value = action(args.MimeType, args.Expression, args.PathComponents, args.Model);
+				args.Value = action(args.Expression, args.PathComponents, args.Model);
 				args.Success = args.Value != null;
 			};
 			return this;
@@ -83,6 +83,7 @@ namespace Routable.Views.Simple
 				mimeType = DefaultMimeType;
 			}
 			resolveViewArgs.MimeType = mimeType;
+			resolveViewArgs.LastModified = File.GetLastWriteTimeUtc(path);
 			resolveViewArgs.GetStream = () => Task.FromResult<Stream>(File.OpenRead(path));
 			resolveViewArgs.Success = true;
 

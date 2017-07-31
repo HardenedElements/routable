@@ -13,6 +13,9 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Version>1.0.4</Version>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Sprache" Version="2.1.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Routable\Routable.csproj" />

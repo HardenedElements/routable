@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Routable.Views.Simple
@@ -35,9 +36,13 @@ namespace Routable.Views.Simple
 				options = new SimpleFileSystemViewOptions<TContext, TRequest, TResponse>(@this.Context.Options);
 			}
 
-			var view = await SimpleView<TContext, TRequest, TResponse>.Find(options, name);
+			var view = await Template<TContext, TRequest, TResponse>.Find(@this.Context.Options, options, name);
 			@this.Attributes.ContentType = view.MimeType;
-			await @this.WriteAsync(stream => view.WriteAsync(stream, model));
+			await @this.WriteAsync(async stream => {
+				using(var writer = new StreamWriter(stream, @this.Context.Options.StringEncoding)) {
+					await view.TryRender(writer, model);
+				}
+			});
 		}
 	}
 }
