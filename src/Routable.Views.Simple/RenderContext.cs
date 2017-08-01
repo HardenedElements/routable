@@ -16,37 +16,53 @@ namespace Routable.Views.Simple
 
 		private Stack<object> ModelStack = new Stack<object>();
 		public object Model => ModelStack.Peek();
-		private Dictionary<string, string> Cache = new Dictionary<string, string>();
+		private Dictionary<object, IDictionary<string, object>> Cache = new Dictionary<object, IDictionary<string, object>>();
 
 		public RenderContext(RoutableOptions<TContext, TRequest, TResponse> options) => Options = options;
 
-		public void Push(object model)
+		public void Push(object model) => ModelStack.Push(model);
+		public void Pop() => ModelStack.Pop();
+		private bool TryHitCache(object model, string expression, out object value)
 		{
-			ModelStack.Push(model);
-			Cache.Clear();
+			lock(Cache) {
+				if(Cache.ContainsKey(model) == false) {
+					value = null;
+					return false;
+				}
+
+				return Cache[model].TryGetValue(expression, out value);
+			}
 		}
-		public void Pop()
+		private void UpdateCache(object model, string expression, object value)
 		{
-			ModelStack.Pop();
-			Cache.Clear();
+			lock(Cache) {
+				if(Cache.TryGetValue(model, out var dict) == false) {
+					dict = new Dictionary<string, object>();
+					Cache[model] = dict;
+				}
+
+				dict.Add(expression, value);
+			}
 		}
 
-		public bool TryGetValue(string expression, bool onlyUseModel, out string value)
+		private bool TryGetValue(object model, string expression, bool onlyUseModel, out object value)
 		{
-			if(Cache.TryGetValue(expression, out value) == true) {
+			if(TryHitCache(model, expression, out value) == true) {
 				return true;
 			}
 
 			var pathComponents = expression.Split('.');
-			if(TryGetModelValue(Model, pathComponents, out value) == true) {
-				Cache.Add(expression, value);
+			if(TryGetModelValue(model, pathComponents, out value) == true) {
+				UpdateCache(model, expression, value);
 				return true;
-			} else if(onlyUseModel == false && ViewOptions.TryResolveUnresolvedModelKey(expression, pathComponents, Model, out value) == true) {
+			} else if(onlyUseModel == false && ViewOptions.TryResolveUnresolvedModelKey(expression, pathComponents, model, out value) == true) {
 				return true;
 			}
 			return false;
 		}
-		private bool TryGetModelValue(object model, IEnumerable<string> fields, out string value)
+		public bool TryGetValue(string expression, bool onlyUseModel, out object value) => TryGetValue(Model, expression, onlyUseModel, out value);
+		public bool TryGetRootValue(string expression, bool onlyUseModel, out object value) => TryGetValue(ModelStack.Last(), expression, onlyUseModel, out value);
+		private bool TryGetModelValue(object model, IEnumerable<string> fields, out object value)
 		{
 			var current = model;
 			while(fields.Any() == true && current != null) {
@@ -75,7 +91,7 @@ namespace Routable.Views.Simple
 
 			// make sure we went through all of the fields.
 			if(current != model && fields.Any() == false) {
-				value = current?.ToString() ?? "";
+				value = current;
 				return true;
 			}
 

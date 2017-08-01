@@ -20,7 +20,7 @@ namespace Routable.Views.Simple
 		public IEnumerable<string> PathComponents { get; set; }
 		public object Model { get; set; }
 		public bool Success { get; set; } = false;
-		public string Value { get; set; }
+		public object Value { get; set; }
 	}
 	public abstract class SimpleViewOptions<TContext, TRequest, TResponse>
 			where TContext : RoutableContext<TContext, TRequest, TResponse>
@@ -33,7 +33,7 @@ namespace Routable.Views.Simple
 
 		public SimpleViewOptions(RoutableOptions<TContext, TRequest, TResponse> options) => RoutableOptions = options;
 
-		internal bool TryResolveUnresolvedModelKey(string expression, IEnumerable<string> pathComponents, object model, out string value)
+		internal bool TryResolveUnresolvedModelKey(string expression, IEnumerable<string> pathComponents, object model, out object value)
 		{
 			var args = new UnresolvedModelKeyEventArgs {
 				Expression = expression,

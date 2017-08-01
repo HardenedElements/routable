@@ -49,7 +49,7 @@ namespace Routable.Views.Simple
 		/// <summary>
 		/// Add a callback to the list of event handlers used to try and resolve model values when traditional methods fail.
 		/// </summary>
-		public SimpleFileSystemViewOptions<TContext, TRequest, TResponse> OnUnresolvedModelValue(Func<string, IEnumerable<string>, object, string> action)
+		public SimpleFileSystemViewOptions<TContext, TRequest, TResponse> OnUnresolvedModelValue(Func<string, IEnumerable<string>, object, object> action)
 		{
 			ResolveUnresolvedModelKey += (_, args) => {
 				args.Value = action(args.Expression, args.PathComponents, args.Model);

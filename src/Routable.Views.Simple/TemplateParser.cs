@@ -22,36 +22,29 @@ namespace Routable.Views.Simple
 			ViewOptions = viewOptions;
 		}
 
+		private IEnumerable<Parser<Node<TContext, TRequest, TResponse>>> GetParsers()
+		{
+			return new[] {
+				IfSetNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
+				EndIfSetNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
+				ForEachNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
+				EndForEachNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
+				ModelNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
+				RootNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
+				ContentNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions)
+			};
+		}
 		private Parser<IEnumerable<IEnumerable<Node<TContext, TRequest, TResponse>>>> GetParser()
 		{
-			var ifSetSymbol =
-				from condOpen in Parse.Char('@').Then(_ => Parse.String("IfSet("))
-				from body in Parse.LetterOrDigit.Or(Parse.Char('.')).Many().Text()
-				from condClose in Parse.Char(')')
-				select (Node<TContext, TRequest, TResponse>)new IfSetNode<TContext, TRequest, TResponse>(Options, ViewOptions, body);
-			var endIfSymbol =
-				from condOpen in Parse.Char('@').Then(_ => Parse.String("EndIfSet"))
-				select (Node<TContext, TRequest, TResponse>)new EndIfNode<TContext, TRequest, TResponse>(Options, ViewOptions);
-			var modelSymbol =
-				from condOpen in Parse.Char('@').Then(_ => Parse.String("Model"))
-				from prop in Parse.Char('.').Then(_ => Parse.LetterOrDigit.Many().Text()).Many()
-				select (Node<TContext, TRequest, TResponse>)new ModelNode<TContext, TRequest, TResponse>(Options, ViewOptions, string.Join(".", prop));
-			var atSymbol =
-				from at in Parse.Char('@').Many().Text()
-				select (Node<TContext, TRequest, TResponse>)new ContentNode<TContext, TRequest, TResponse>(Options, ViewOptions, at);
-			var contentSymbol =
-				from before in Parse.CharExcept('@').Or(Parse.Char('\n')).Or(Parse.Char('\r')).Many().Text()
-				select (Node<TContext, TRequest, TResponse>)new ContentNode<TContext, TRequest, TResponse>(Options, ViewOptions, before);
-
-			var parser =
-				ifSetSymbol
-				.Or(endIfSymbol)
-				.Or(modelSymbol)
-				.Or(atSymbol)
-				.Or(contentSymbol)
-				.Many();
-
-			return parser.Many();
+			Parser<Node<TContext, TRequest, TResponse>> current = null;
+			foreach(var parser in GetParsers()) {
+				if(current == null) {
+					current = parser;
+				} else {
+					current = current.Or(parser);
+				}
+			}
+			return current.Many().Many();
 		}
 		private IEnumerable<Node<TContext, TRequest, TResponse>> RollupNodes(Node<TContext, TRequest, TResponse>[] symbols, ref int index)
 		{
@@ -62,7 +55,10 @@ namespace Routable.Views.Simple
 				if(symbol is IfSetNode<TContext, TRequest, TResponse>) {
 					symbol.Children.AddRange(RollupNodes(symbols, ref index));
 					output.Add(symbol);
-				} else if(symbol is EndIfNode<TContext, TRequest, TResponse>) {
+				} else if(symbol is ForEachNode<TContext, TRequest, TResponse>) {
+					symbol.Children.AddRange(RollupNodes(symbols, ref index));
+					output.Add(symbol);
+				} else if(symbol is EndIfSetNode<TContext, TRequest, TResponse> || symbol is EndForEachNode<TContext, TRequest, TResponse>) {
 					return output;
 				} else {
 					output.Add(symbol);
