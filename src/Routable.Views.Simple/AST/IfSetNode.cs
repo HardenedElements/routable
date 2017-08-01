@@ -1,3 +1,4 @@
+using Sprache;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +12,11 @@ namespace Routable.Views.Simple.AST
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
+		public static Parser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions) =>
+			from condOpen in Parse.Char('@').Then(_ => Parse.String("IfSet("))
+			from body in Parse.LetterOrDigit.Or(Parse.Char('.')).Many().Text()
+			from condClose in Parse.Char(')')
+			select new IfSetNode<TContext, TRequest, TResponse>(options, viewOptions, body);
 		public string Expression { get; private set; }
 
 		public IfSetNode(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions, string expression) : base(options, viewOptions) => Expression = expression;
