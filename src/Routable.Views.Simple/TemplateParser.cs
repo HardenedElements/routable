@@ -26,16 +26,16 @@ namespace Routable.Views.Simple
 		{
 			var ifSetSymbol =
 				from condOpen in Parse.Char('@').Then(_ => Parse.String("IfSet("))
-				from body in Parse.LetterOrDigit.Many()
+				from body in Parse.LetterOrDigit.Or(Parse.Char('.')).Many().Text()
 				from condClose in Parse.Char(')')
-				select (Node<TContext, TRequest, TResponse>)new IfSetNode<TContext, TRequest, TResponse>(Options, ViewOptions, string.Concat(body));
+				select (Node<TContext, TRequest, TResponse>)new IfSetNode<TContext, TRequest, TResponse>(Options, ViewOptions, body);
 			var endIfSymbol =
 				from condOpen in Parse.Char('@').Then(_ => Parse.String("EndIfSet"))
 				select (Node<TContext, TRequest, TResponse>)new EndIfNode<TContext, TRequest, TResponse>(Options, ViewOptions);
 			var modelSymbol =
 				from condOpen in Parse.Char('@').Then(_ => Parse.String("Model"))
-				from prop in Parse.Char('.').Then(_ => Parse.LetterOrDigit.Many()).Many()
-				select (Node<TContext, TRequest, TResponse>)new ModelNode<TContext, TRequest, TResponse>(Options, ViewOptions, string.Concat(prop.SelectMany(_ => _)));
+				from prop in Parse.Char('.').Then(_ => Parse.LetterOrDigit.Many().Text()).Many()
+				select (Node<TContext, TRequest, TResponse>)new ModelNode<TContext, TRequest, TResponse>(Options, ViewOptions, string.Join(".", prop));
 			var atSymbol =
 				from at in Parse.Char('@').Many().Text()
 				select (Node<TContext, TRequest, TResponse>)new ContentNode<TContext, TRequest, TResponse>(Options, ViewOptions, at);
