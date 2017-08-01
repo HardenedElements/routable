@@ -14,7 +14,9 @@ namespace RoutableTest
 		{
 			// write a view using Routable.Views.Simple.
 			Add(_ => _.Get("/").Do(async (ctx, req, resp) => await resp.WriteViewAsync("index", new {
-				SomeModelField = "Widget widget"
+				SomeModelField = new {
+					Nested = "Widget widget"
+				}
 			})));
 
 			Add(_ => _.Get("/test").Do(async (ctx, req, resp) => await resp.WriteAsync("Hello World!")));
