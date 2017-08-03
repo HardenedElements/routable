@@ -4,10 +4,15 @@
 	<title>Sample</title>
 </head>
 <body>
-	<h1>This is a sample</h1>
+	<h1>Here, we'll display a value in a paragraph if another is set.</h1>
 	@IfSet(SomeModelField)
 	<p class="error" style="color: red"><strong>@Model.SomeModelField.Nested</strong></p>
 	@EndIfSet
+
+	<h1>Let's include another view...</h1>
+	@Include(test/embed)
+
+	<h1>Here we'll iterate over a list of people.</h1>
 	<ul>
 		@ForEach(People)
 		<li><strong>@Model.Name</strong>, let me just say... <i>@Root.SomeModelField.Nested</i></li>

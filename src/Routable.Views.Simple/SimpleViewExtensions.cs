@@ -58,14 +58,7 @@ namespace Routable.Views.Simple
 			where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 			where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 		{
-			if(@this.Context.Options.TryGetFeatureOptions<List<SimpleViewOptions<TContext, TRequest, TResponse>>>(out var list) == false) {
-				// use default options.
-				list = new List<SimpleViewOptions<TContext, TRequest, TResponse>>() {
-					new SimpleFileSystemViewOptions<TContext, TRequest, TResponse>(@this.Context.Options)
-				};
-			}
-
-			var view = await Template<TContext, TRequest, TResponse>.Find(@this.Context.Options, list, name);
+			var view = await Template<TContext, TRequest, TResponse>.Find(@this.Context.Options, name);
 			@this.Attributes.ContentType = view.MimeType;
 			await @this.WriteAsync(async stream => {
 				using(var writer = new StreamWriter(stream, @this.Context.Options.StringEncoding)) {
