@@ -7,6 +7,7 @@ using Routable.Kestrel;
 using Routable.Views.Simple;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace RoutableTest
 {
@@ -22,6 +23,9 @@ namespace RoutableTest
 
 			// demo: add support for views.
 			.UseFileSystemViews(_ => _.AddSearchPath("views").OnUnresolvedModelValue((expr, paths, model) => $"[ERR! ({expr})]"))
+
+			// demo: add support for embedded views.
+			.UseEmbeddedViews(_ => _.AddAssembly(typeof(Startup).GetTypeInfo().Assembly, "KestrelSample.embedded_views"))
 
 			// demo: execute this route on all requests, logging the request to stderr.
 			.AddRouting(new KestrelRouting(options) {

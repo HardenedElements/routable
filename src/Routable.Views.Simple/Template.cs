@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Routable.Views.Simple
@@ -27,7 +26,7 @@ namespace Routable.Views.Simple
 
 		public async Task<bool> TryRender(StreamWriter writer, object model)
 		{
-			var context = new RenderContext<TContext, TRequest, TResponse>(Options);
+			var context = new RenderContext<TContext, TRequest, TResponse>(Options, ViewOptions);
 			context.Push(model);
 
 			foreach(var node in Nodes) {
@@ -39,27 +38,31 @@ namespace Routable.Views.Simple
 			return true;
 		}
 
-		public static async Task<Template<TContext, TRequest, TResponse>> Find(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions, string viewName)
+		public static async Task<Template<TContext, TRequest, TResponse>> Find(RoutableOptions<TContext, TRequest, TResponse> options, IReadOnlyList<SimpleViewOptions<TContext, TRequest, TResponse>> viewOptionsCollection, string viewName)
 		{
-			// resolve view.
-			var resolveViewArgs = new ResolveViewArgs { Name = viewName };
-			await viewOptions.ResolveView(resolveViewArgs);
-			if(resolveViewArgs.Success == false) {
-				throw new SimpleViewNotFoundException(viewName);
-			}
+			foreach(var viewOptions in viewOptionsCollection) {
+				// resolve view.
+				var resolveViewArgs = new ResolveViewArgs { Name = viewName };
+				await viewOptions.ResolveView(resolveViewArgs);
+				if(resolveViewArgs.Success == false) {
+					continue;
+				}
 
-			// parse view source and return a template.
-			using(var stream = await resolveViewArgs.GetStream())
-			using(var reader = new StreamReader(stream)) {
-				try {
-					var parser = new TemplateParser<TContext, TRequest, TResponse>(options, viewOptions);
-					var template = parser.TryParse(viewName, resolveViewArgs.LastModified, await reader.ReadToEndAsync());
-					template.MimeType = resolveViewArgs.MimeType;
-					return template;
-				} catch(Exception ex) {
-					throw new SimpleViewParserException(viewName, ex);
+				// parse view source and return a template.
+				using(var stream = await resolveViewArgs.GetStream())
+				using(var reader = new StreamReader(stream)) {
+					try {
+						var parser = new TemplateParser<TContext, TRequest, TResponse>(options, viewOptions);
+						var template = parser.TryParse(viewName, resolveViewArgs.LastModified, await reader.ReadToEndAsync());
+						template.MimeType = resolveViewArgs.MimeType;
+						return template;
+					} catch(Exception ex) {
+						throw new SimpleViewParserException(viewName, ex);
+					}
 				}
 			}
+
+			throw new SimpleViewNotFoundException(viewName);
 		}
 	}
 }

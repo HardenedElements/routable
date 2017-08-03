@@ -3,12 +3,10 @@ using Sprache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Routable.Views.Simple
 {
-	public class TemplateParser<TContext, TRequest, TResponse>
+	internal class TemplateParser<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
