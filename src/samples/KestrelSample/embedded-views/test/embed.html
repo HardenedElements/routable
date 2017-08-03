@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Embedded Sample</title>
+</head>
+<body>
+	<h1>This sample was embedded in the assembly :)</h1>
+	@IfSet(SomeModelField)
+	<p class="error" style="color: red"><strong>@Model.SomeModelField.Nested</strong></p>
+	@EndIfSet
+	<ul>
+		@ForEach(People)
+		<li><strong>@Model.Name</strong>, let me just say... <i>@Root.SomeModelField.Nested</i></li>
+		@EndForEach
+	</ul>
+</body>
+</html>

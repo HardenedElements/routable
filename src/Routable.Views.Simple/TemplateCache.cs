@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Routable.Views.Simple
 {
-	public class TemplateCache<TContext, TRequest, TResponse>
+	internal class TemplateCache<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>

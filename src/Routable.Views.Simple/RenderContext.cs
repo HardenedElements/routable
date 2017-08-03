@@ -1,24 +1,26 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Routable.Views.Simple
 {
-	public class RenderContext<TContext, TRequest, TResponse>
+	internal class RenderContext<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
 		protected RoutableOptions<TContext, TRequest, TResponse> Options { get; private set; }
-		protected SimpleViewOptions<TContext, TRequest, TResponse> ViewOptions => Options.TryGetFeatureOptions<SimpleViewOptions<TContext, TRequest, TResponse>>(out var details) ? details : throw new InvalidOperationException("Failed to load configuration");
+		protected SimpleViewOptions<TContext, TRequest, TResponse> ViewOptions { get; private set; }
 
 		private Stack<object> ModelStack = new Stack<object>();
 		public object Model => ModelStack.Peek();
 		private Dictionary<object, IDictionary<string, object>> Cache = new Dictionary<object, IDictionary<string, object>>();
 
-		public RenderContext(RoutableOptions<TContext, TRequest, TResponse> options) => Options = options;
+		public RenderContext(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions)
+		{
+			Options = options;
+			ViewOptions = viewOptions;
+		}
 
 		public void Push(object model) => ModelStack.Push(model);
 		public void Pop() => ModelStack.Pop();
