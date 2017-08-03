@@ -24,11 +24,8 @@ namespace Routable.Views.Simple
 			Nodes = nodes.ToList();
 		}
 
-		public async Task<bool> TryRender(StreamWriter writer, object model)
+		internal async Task<bool> TryRender(StreamWriter writer, RenderContext<TContext, TRequest, TResponse> context)
 		{
-			var context = new RenderContext<TContext, TRequest, TResponse>(Options, ViewOptions);
-			context.Push(model);
-
 			foreach(var node in Nodes) {
 				if(await node.TryRender(writer, context) == false) {
 					return false;
@@ -37,9 +34,22 @@ namespace Routable.Views.Simple
 
 			return true;
 		}
-
-		public static async Task<Template<TContext, TRequest, TResponse>> Find(RoutableOptions<TContext, TRequest, TResponse> options, IReadOnlyList<SimpleViewOptions<TContext, TRequest, TResponse>> viewOptionsCollection, string viewName)
+		public Task<bool> TryRender(StreamWriter writer, object model)
 		{
+			var context = new RenderContext<TContext, TRequest, TResponse>(Options, ViewOptions);
+			context.Push(model);
+			return TryRender(writer, context);
+		}
+
+		public static async Task<Template<TContext, TRequest, TResponse>> Find(RoutableOptions<TContext, TRequest, TResponse> options, string viewName)
+		{
+			if(options.TryGetFeatureOptions<List<SimpleViewOptions<TContext, TRequest, TResponse>>>(out var viewOptionsCollection) == false) {
+				// use default options.
+				viewOptionsCollection = new List<SimpleViewOptions<TContext, TRequest, TResponse>>() {
+					new SimpleFileSystemViewOptions<TContext, TRequest, TResponse>(options)
+				};
+			}
+
 			foreach(var viewOptions in viewOptionsCollection) {
 				// resolve view.
 				var resolveViewArgs = new ResolveViewArgs { Name = viewName };

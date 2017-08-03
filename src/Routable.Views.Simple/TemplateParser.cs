@@ -27,6 +27,7 @@ namespace Routable.Views.Simple
 				EndIfSetNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
 				ForEachNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
 				EndForEachNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
+				IncludeNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
 				ModelNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
 				RootNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
 				ContentNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions)
