@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -44,7 +44,7 @@ namespace RoutableTest
 				_ => _.Get("/meeseeks").Do(async (ctx, req, resp) => await resp.WriteAsync("Hi, I'm Mr. Meeseeks!")),
 				_ => _.Path("/grimey").Do(async (ctx, req, resp) => await resp.WriteAsync("I don't check methods, because I'm Homer Simpson!")),
 				// demo: show off nested routing... for the curious, no - there is no limit.
-				_ => _.Path(new Regex("/nest(?<myParameter>.*)")).Nest(async (_ctx, _req, _resp) => {
+				_ => _.Path(new Regex("/nest(?<myParameter>.*)")).Nest((_ctx, _req, _resp) => {
 					var routing = new KestrelRouting(options) {
 						// demo: toss in a cheeky little static route.
 						builder => builder.Get("/nest/always").Do(async (ctx, req, resp) => await resp.WriteAsync("This route is always here for you"))

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -13,7 +13,7 @@ namespace Routable.Views.Simple
 		protected SimpleViewOptions<TContext, TRequest, TResponse> ViewOptions { get; private set; }
 
 		private Stack<object> ModelStack = new Stack<object>();
-		public object Model => ModelStack.Peek();
+		public object Model => ModelStack.Any() ? ModelStack.Peek() : null;
 		private Dictionary<object, IDictionary<string, object>> Cache = new Dictionary<object, IDictionary<string, object>>();
 
 		public RenderContext(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions)
@@ -27,7 +27,7 @@ namespace Routable.Views.Simple
 		private bool TryHitCache(object model, string expression, out object value)
 		{
 			lock(Cache) {
-				if(Cache.ContainsKey(model) == false) {
+				if(model == null || Cache.ContainsKey(model) == false) {
 					value = null;
 					return false;
 				}
@@ -63,7 +63,7 @@ namespace Routable.Views.Simple
 			return false;
 		}
 		public bool TryGetValue(string expression, bool onlyUseModel, out object value) => TryGetValue(Model, expression, onlyUseModel, out value);
-		public bool TryGetRootValue(string expression, bool onlyUseModel, out object value) => TryGetValue(ModelStack.Last(), expression, onlyUseModel, out value);
+		public bool TryGetRootValue(string expression, bool onlyUseModel, out object value) => TryGetValue(ModelStack.LastOrDefault(), expression, onlyUseModel, out value);
 		private bool TryGetModelValue(object model, IEnumerable<string> fields, out object value)
 		{
 			var current = model;

@@ -1,4 +1,4 @@
-using Routable.Patterns;
+﻿using Routable.Patterns;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,6 +49,7 @@ namespace Routable
 		public Route<TContext, TRequest, TResponse> Do(Func<TContext, TRequest, TResponse, Task> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
 		public Route<TContext, TRequest, TResponse> Try(Func<TContext, TRequest, TResponse, Task<bool>> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
 		public Route<TContext, TRequest, TResponse> Nest(Func<TContext, TRequest, TResponse, Task<Routing<TContext, TRequest, TResponse>>> action) => Do((NestedRouteAction<TContext, TRequest, TResponse>)action);
+		public Route<TContext, TRequest, TResponse> Nest(Func<TContext, TRequest, TResponse, Routing<TContext, TRequest, TResponse>> action) => Do((NestedRouteAction<TContext, TRequest, TResponse>)action);
 
 		/// <summary>
 		/// Restrict a route to a given pattern.

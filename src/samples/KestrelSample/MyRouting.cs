@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Routable;
@@ -22,6 +22,7 @@ namespace RoutableTest
 				},
 				People = people
 			})));
+			Add(_ => _.Get("/no-model").Do(async (ctx, req, resp) => await resp.WriteViewAsync("index")));
 
 			// write an embedded view
 			Add(_ => _.Get("/embedded").Do(async (ctx, req, resp) => await resp.WriteViewAsync("test/embed", new {
