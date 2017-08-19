@@ -13,6 +13,6 @@ namespace Routable.Patterns
 
 		public PortPattern(int port) => Port = port;
 
-		public override bool IsMatch(RoutableContext<TContext, TRequest, TResponse> context) => context.Request.Uri.Port == Port;
+		public override bool IsMatch(TContext context) => context.Request.Uri.Port == Port;
 	}
 }

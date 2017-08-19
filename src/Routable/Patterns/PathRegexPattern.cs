@@ -16,7 +16,7 @@ namespace Routable.Patterns
 		public PathRegexPattern(Regex pattern) => Pattern = pattern;
 		public PathRegexPattern(string pattern) => Pattern = new Regex(pattern, RegexOptions.Compiled);
 
-		public override bool IsMatch(RoutableContext<TContext, TRequest, TResponse> context)
+		public override bool IsMatch(TContext context)
 		{
 			var match = Pattern.Match(context.Request.Uri.AbsolutePath);
 			if(match.Success == true) {
