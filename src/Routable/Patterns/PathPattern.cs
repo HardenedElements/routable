@@ -23,7 +23,7 @@ namespace Routable.Patterns
 			}
 		}
 
-		public override bool IsMatch(RoutableContext<TContext, TRequest, TResponse> context)
+		public override bool IsMatch(TContext context)
 		{
 			var requestPath = context.Request.Uri.AbsolutePath?.ToLower()?.TrimEnd('/');
 			if(requestPath.StartsWith("/") == false) {

@@ -86,7 +86,8 @@ namespace Routable.Views.Simple
 			foreach(var search in SearchPaths.SelectMany(_ => _.Prefixes.Select(prefix => new { prefix = prefix, assembly = _.Assembly }))) {
 				// search every path pattern.
 				foreach(var path in paths) {
-					var info = search.assembly.GetManifestResourceInfo($"{search.prefix.TrimEnd('.')}.{path}");
+					var absolutePath = string.IsNullOrWhiteSpace(search.prefix) ? path : $"{search.prefix.TrimEnd('.')}.{path}";
+					var info = search.assembly.GetManifestResourceInfo(absolutePath);
 					if(info == null) {
 						continue;
 					}
@@ -99,7 +100,7 @@ namespace Routable.Views.Simple
 					// construct response.
 					resolveViewArgs.MimeType = mimeType;
 					resolveViewArgs.LastModified = DateTime.MinValue; // embedded resources will not ever change.
-					resolveViewArgs.GetStream = () => Task.FromResult(search.assembly.GetManifestResourceStream($"{search.prefix.TrimEnd('.')}.{path}"));
+					resolveViewArgs.GetStream = () => Task.FromResult(search.assembly.GetManifestResourceStream(absolutePath));
 					resolveViewArgs.Success = true;
 					return Task.CompletedTask;
 				}

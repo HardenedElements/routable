@@ -1,4 +1,4 @@
-﻿using Routable.Patterns;
+using Routable.Patterns;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace Routable
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
-		protected RouteAction<TContext, TRequest, TResponse> RouteAction;
+		protected List<RouteAction<TContext, TRequest, TResponse>> Actions = new List<RouteAction<TContext, TRequest, TResponse>>();
 
 		private IList<RoutePattern<TContext, TRequest, TResponse>> _Patterns = new List<RoutePattern<TContext, TRequest, TResponse>>();
 		private IReadOnlyList<RoutePattern<TContext, TRequest, TResponse>> Patterns => (IReadOnlyList<RoutePattern<TContext, TRequest, TResponse>>)_Patterns;
@@ -31,10 +31,15 @@ namespace Routable
 		/// <returns>Task that indicates when the request completes, providing a value indicating whether this route was able to handle the request</returns>
 		public virtual async Task<bool> Invoke(TContext context)
 		{
-			if(RouteAction == null) {
+			if(Actions == null || Actions.Any() == false) {
 				return false;
 			} else {
-				return await RouteAction.Invoke(context);
+				foreach(var action in Actions) {
+					if(await action.Invoke(context) == true) {
+						return true;
+					}
+				}
+				return false;
 			}
 		}
 
@@ -43,7 +48,7 @@ namespace Routable
 		/// </summary>
 		public Route<TContext, TRequest, TResponse> Do(RouteAction<TContext, TRequest, TResponse> action)
 		{
-			RouteAction = action;
+			Actions.Add(action);
 			return this;
 		}
 		public Route<TContext, TRequest, TResponse> Do(Func<TContext, TRequest, TResponse, Task> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
