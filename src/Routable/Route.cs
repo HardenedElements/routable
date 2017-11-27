@@ -51,8 +51,10 @@ namespace Routable
 			Actions.Add(action);
 			return this;
 		}
-		public Route<TContext, TRequest, TResponse> Do(Func<TContext, TRequest, TResponse, Task> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
-		public Route<TContext, TRequest, TResponse> Try(Func<TContext, TRequest, TResponse, Task<bool>> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
+		public Route<TContext, TRequest, TResponse> Do(Action<TContext, TRequest, TResponse> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
+		public Route<TContext, TRequest, TResponse> DoAsync(Func<TContext, TRequest, TResponse, Task> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
+		public Route<TContext, TRequest, TResponse> Try(Func<TContext, TRequest, TResponse, bool> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
+		public Route<TContext, TRequest, TResponse> TryAsync(Func<TContext, TRequest, TResponse, Task<bool>> action) => Do((BasicRouteAction<TContext, TRequest, TResponse>)action);
 		public Route<TContext, TRequest, TResponse> Nest(Func<TContext, TRequest, TResponse, Task<Routing<TContext, TRequest, TResponse>>> action) => Do((NestedRouteAction<TContext, TRequest, TResponse>)action);
 		public Route<TContext, TRequest, TResponse> Nest(Func<TContext, TRequest, TResponse, Routing<TContext, TRequest, TResponse>> action) => Do((NestedRouteAction<TContext, TRequest, TResponse>)action);
 

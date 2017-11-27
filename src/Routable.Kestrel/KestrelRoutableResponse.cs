@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -60,11 +61,19 @@ namespace Routable.Kestrel
 			_Attributes = new KestrelResponseAttributes(this);
 		}
 
-		public async override Task WriteAsync(Func<Stream, Task> writer) => await writer(Body);
 		public override Task Redirect(string location)
 		{
 			PlatformResponse.Redirect(location);
 			return Task.CompletedTask;
+		}
+
+		protected override async Task Finalize(IReadOnlyList<Func<RoutableContext<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse>, Stream, Task>> writers)
+		{
+			using(Body) {
+				foreach(var writer in writers) {
+					await writer(Context, Body);
+				}
+			}
 		}
 	}
 }

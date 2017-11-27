@@ -1,11 +1,40 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Routable.Kestrel
 {
+	public class KestrelRequestAttributes : AbstractRequestAttributes
+	{
+		private KestrelRoutableRequest Request;
+
+		public override long ContentLength => Request.ContentLength ?? 0;
+		public override string ContentType => Request.PlatformRequest.ContentType;
+		public override string Method => Request.Method;
+		public override bool TryGetCookie(string name, out string value) => Request.Cookies.TryGetValue(name, out value);
+		public override bool TryGetHeader(string name, out IEnumerable<string> value)
+		{
+			if(Request.Headers.TryGetValue(name, out var stringValues) == true) {
+				value = stringValues;
+				return true;
+			} else {
+				value = null;
+				return false;
+			}
+		}
+
+		public async override Task<string> GetBodyAsString(Encoding encoding = null)
+		{
+			using(var reader = new StreamReader(Request.Body, encoding ?? Encoding.UTF8, encoding == null ? true : false, 4096, true)) {
+				return await reader.ReadToEndAsync();
+			}
+		}
+
+		internal KestrelRequestAttributes(KestrelRoutableRequest request) => Request = request;
+	}
 	public class KestrelRoutableRequest : RoutableRequest<
 		KestrelRoutableContext,
 		KestrelRoutableRequest,
@@ -19,6 +48,8 @@ namespace Routable.Kestrel
 		Stream>
 	{
 		public Microsoft.AspNetCore.Http.HttpRequest PlatformRequest => Context.PlatformContext.Request;
+		private AbstractRequestAttributes _Attributes;
+		public override AbstractRequestAttributes Attributes => _Attributes;
 		public override string Method => PlatformRequest.Method;
 		private Uri _Uri;
 		public override Uri Uri
@@ -62,13 +93,6 @@ namespace Routable.Kestrel
 		public override long? ContentLength => PlatformRequest.ContentLength;
 		public override Stream Body => PlatformRequest.Body;
 
-		internal KestrelRoutableRequest(KestrelRoutableContext context) : base(context) { }
-
-		public async override Task<string> GetBodyAsString(Encoding encoding = null)
-		{
-			using(var reader = new StreamReader(Body, encoding ?? Encoding.UTF8, encoding == null ? true : false, 4096, true)) {
-				return await reader.ReadToEndAsync();
-			}
-		}
+		internal KestrelRoutableRequest(KestrelRoutableContext context) : base(context) => _Attributes = new KestrelRequestAttributes(this);
 	}
 }

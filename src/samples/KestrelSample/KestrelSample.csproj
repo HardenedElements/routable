@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="embedded-views\embed.html" />
@@ -11,8 +11,8 @@
     <EmbeddedResource Include="embedded-views\test\embed.html" />
   </ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Http" Version="1.1.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Routable.Json\Routable.Json.csproj" />

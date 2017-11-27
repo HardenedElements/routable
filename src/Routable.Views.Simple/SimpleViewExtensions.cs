@@ -53,15 +53,21 @@ namespace Routable.Views.Simple
 			return @this;
 		}
 
+		/// <summary>
+		/// Write a view to the user agent upon request finalization.
+		/// </summary>
+		/// <param name="name">The name of the view to write</param>
+		/// <param name="model">A model to pass to the view upon rendering</param>
+		/// <returns>A task to be completed after the view has been resolved. The completion of this task should not be confused to indicate request finalization.</returns>
 		public async static Task WriteViewAsync<TContext, TRequest, TResponse>(this RoutableResponse<TContext, TRequest, TResponse> @this, string name, object model = null)
 			where TContext : RoutableContext<TContext, TRequest, TResponse>
 			where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 			where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 		{
 			var view = await Template<TContext, TRequest, TResponse>.Find(@this.Context.Options, name);
-			@this.Attributes.ContentType = view.MimeType;
-			await @this.WriteAsync(async stream => {
-				using(var writer = new StreamWriter(stream, @this.Context.Options.StringEncoding)) {
+			@this.Write(async (context, stream) => {
+				context.Response.Attributes.ContentType = view.MimeType;
+				using(var writer = new StreamWriter(stream, context.Options.StringEncoding)) {
 					await view.TryRender(writer, model);
 				}
 			});

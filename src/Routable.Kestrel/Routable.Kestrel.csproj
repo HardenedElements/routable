@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netstandard1.3</TargetFramework>
+		<TargetFramework>netstandard2.0</TargetFramework>
     <PackageIconUrl>http://www.hardenedelements.com/images/he-icon.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/HardenedElements/routable</PackageProjectUrl>
     <PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
@@ -11,13 +11,13 @@
     <Description>Use Routable with the Kestrel HTTP server</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.0.9</Version>
+    <Version>1.1.0</Version>
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Routable\Routable.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Http" Version="1.1.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.0.1" />
 	</ItemGroup>
 </Project>

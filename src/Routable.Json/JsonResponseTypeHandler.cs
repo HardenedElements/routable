@@ -10,7 +10,7 @@ namespace Routable.Json
 {
 	public static class JsonResponseTypeHandlers
 	{
-		public async static Task JsonResponseTypeHandler<TContext, TRequest, TResponse>(RoutableContext<TContext, TRequest, TResponse> context, object value)
+		public static void JsonResponseTypeHandler<TContext, TRequest, TResponse>(RoutableContext<TContext, TRequest, TResponse> context, object value)
 			where TContext : RoutableContext<TContext, TRequest, TResponse>
 			where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 			where TResponse : RoutableResponse<TContext, TRequest, TResponse>
@@ -18,12 +18,12 @@ namespace Routable.Json
 			context.Response.Attributes.ContentType = "application/json";
 
 			if(value == null) {
-				await context.Response.WriteAsync("");
+				context.Response.Write("");
 				return;
 			}
 
 			var str = value.ToString();
-			await context.Response.WriteAsync(str);
+			context.Response.Write(str);
 		}
 	}
 }

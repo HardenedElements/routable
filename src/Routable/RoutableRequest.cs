@@ -6,6 +6,39 @@ using System.Threading.Tasks;
 
 namespace Routable
 {
+	public abstract class AbstractRequestAttributes
+	{
+		/// <summary>
+		/// Get the request method (verb) as a string; regardless of platform.
+		/// </summary>
+		public abstract string Method { get; }
+		/// <summary>
+		/// Content length as a long integer, regardless of platform.
+		/// </summary>
+		public abstract long ContentLength { get; }
+		/// <summary>
+		/// Content type as a string, regardless of platform.
+		/// </summary>
+		public abstract string ContentType { get; }
+
+		/// <summary>
+		/// Get a header, regardless of the platform.
+		/// </summary>
+		/// <param name="name">The name of the header</param>
+		/// <param name="value">The value of the header if available</param>
+		public abstract bool TryGetHeader(string name, out IEnumerable<string> value);
+		/// <summary>
+		/// Get a request cookie, regardless of platform.
+		/// </summary>
+		public abstract bool TryGetCookie(string name, out string value);
+		/// <summary>
+		/// Get the body of the request as a string.
+		/// </summary>
+		/// <param name="encoding">Default is UTF-8</param>
+		/// <returns>A string representation of the body.</returns>
+		public virtual Task<string> GetBodyAsString(Encoding encoding = null) => throw new NotSupportedException();
+	}
+
 	public abstract class RoutableRequest<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
@@ -28,20 +61,12 @@ namespace Routable
 		/// Parameters extracted from the URL (eg. Named regex capture expressions within URL patterns)
 		/// </summary>
 		public virtual IReadOnlyDictionary<string, object> Parameters => (IReadOnlyDictionary<string, object>)_Parameters;
+		/// <summary>
+		/// Platform agnostic response attributes
+		/// </summary>
+		public abstract AbstractRequestAttributes Attributes { get; }
 
 		protected RoutableRequest(TContext context) => Context = context;
-
-		/// <summary>
-		/// Get the body of the request as a string.
-		/// </summary>
-		/// <param name="encoding">Default is UTF-8</param>
-		/// <returns>A string representation of the body.</returns>
-		public virtual Task<string> GetBodyAsString(Encoding encoding = null) => throw new NotSupportedException();
-		/// <summary>
-		/// Get the request method (verb) as a string; regardless of platform.
-		/// </summary>
-		/// <returns></returns>
-		public abstract string GetMethodAsString();
 
 		internal void AddParameter(string name, object value) => _Parameters.Add(name, value);
 	}
@@ -80,7 +105,5 @@ namespace Routable
 		public abstract TBody Body { get; }
 
 		protected RoutableRequest(TContext context) : base(context) { }
-
-		public override string GetMethodAsString() => Method.ToString();
 	}
 }

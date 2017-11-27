@@ -39,6 +39,10 @@ namespace Routable
 		/// Routable abstraction for the response.
 		/// </summary>
 		public abstract TResponse Response { get; }
+		/// <summary>
+		/// If an exception was thrown while processing this request, this value will be set.
+		/// </summary>
+		public Exception Error { get; internal set; }
 	}
 	public abstract class RoutableContext<TPlatformContext, TContext, TRequest, TResponse, TUser, TPerRequestItems> : RoutableContext<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>

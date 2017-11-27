@@ -8,14 +8,13 @@ namespace Routable
 {
 	public static class DefaultResponseTypeHandlers
 	{
-		public static Task EmptyResponseTypeHandler<TContext, TRequest, TResponse>(RoutableContext<TContext, TRequest, TResponse> context, object value)
+		public static void EmptyResponseTypeHandler<TContext, TRequest, TResponse>(RoutableContext<TContext, TRequest, TResponse> context, object value)
 			where TContext : RoutableContext<TContext, TRequest, TResponse>
 			where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 			where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 		{
-			return Task.CompletedTask;
 		}
-		public async static Task ByteArrayResponseTypeHandler<TContext, TRequest, TResponse>(RoutableContext<TContext, TRequest, TResponse> context, object value)
+		public static void ByteArrayResponseTypeHandler<TContext, TRequest, TResponse>(RoutableContext<TContext, TRequest, TResponse> context, object value)
 			where TContext : RoutableContext<TContext, TRequest, TResponse>
 			where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 			where TResponse : RoutableResponse<TContext, TRequest, TResponse>
@@ -27,9 +26,9 @@ namespace Routable
 			}
 
 			context.Response.Attributes.ContentLength = bytes.Length;
-			await context.Response.WriteAsync(async stream => await stream.WriteAsync(bytes, 0, bytes.Length));
+			context.Response.Write(async (ctx, stream) => await stream.WriteAsync(bytes, 0, bytes.Length));
 		}
-		public async static Task StringResponseTypeHandler<TContext, TRequest, TResponse>(RoutableContext<TContext, TRequest, TResponse> context, object value)
+		public static void StringResponseTypeHandler<TContext, TRequest, TResponse>(RoutableContext<TContext, TRequest, TResponse> context, object value)
 			where TContext : RoutableContext<TContext, TRequest, TResponse>
 			where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 			where TResponse : RoutableResponse<TContext, TRequest, TResponse>
@@ -41,7 +40,7 @@ namespace Routable
 			}
 
 			context.Response.Attributes.ContentLength = bytes.Length;
-			await context.Response.WriteAsync(async stream => await stream.WriteAsync(bytes, 0, bytes.Length));
+			context.Response.Write(async (ctx, stream) => await stream.WriteAsync(bytes, 0, bytes.Length));
 		}
 	}
 }
