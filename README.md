@@ -25,24 +25,23 @@ Using a bit of creative license, we'll be using ```Routable.Kestrel``` as a comp
 ```csharp
 public sealed class Startup
 {
-	public Startup(IHostingEnvironment environment) { }
-	public void Configure(IApplicationBuilder builder) => builder.UseRoutable(options => {
-		options
-		.WithJsonSupport()
-		.UseFileSystemViews(_ => _.AddSearchPath("views").OnUnresolvedModelValue((type, expr, paths, model) => $"[ERR! ({expr})]"))
-		.AddRouting(new MyRouting(options))
-		.AddRouting(new KestrelRouting(options) {
-			_ => _.Get("/meeseeks").Do(async (ctx, req, resp) => await resp.WriteAsync("Hi, I'm Mr. Meeseeks!")),
-			_ => _.Path("/grimey").Do(async (ctx, req, resp) => await resp.WriteAsync("I don't check methods, because I'm Homer Simpson!"))
-		})
-		.OnError(async (context, error) => {
-			context.Response.Status = 500;
-			await context.Response.WriteAsync($"{error?.GetType()?.FullName} ({error?.Message}):\n\t{error.StackTrace.Replace("\n", "\n\t")}\n");
-		});
-	});
 	static void Main(string[] args) => new WebHostBuilder()
-		.UseKestrel()
-		.UseStartup<Startup>()
+		.UseKestrel(options => options.Listen(IPAddress.Any, 8080))
+		.Configure(builder => builder.UseRoutable(options => options
+			.WithJsonSupport()
+			.UseFileSystemViews(_ => _.AddSearchPath("views").OnUnresolvedModelValue((expr, paths, model) => $"[ERR! ({expr})]"))
+			.AddRouting(new MyRouting(options))
+			.AddRouting(new KestrelRouting(options) {
+				_ => _.Get("/meeseeks").Do((ctx, req, resp) => resp.Write("Hi, I'm Mr. Meeseeks!")),
+				_ => _.Path("/grimey").Do((ctx, req, resp) => resp.Write("I don't check methods, because I'm Homer Simpson!"))
+			})
+			.OnError(new KestrelRouting(options) {
+				_ => _.Do((context, request, response) => {
+					response.Status = 500;
+					response.Write($"{context.Error?.GetType()?.FullName} ({context.Error?.Message}):\n\t{context.Error.StackTrace.Replace("\n", "\n\t")}\n");
+				})
+			})
+		))
 		.Build()
 		.Run();
 }
@@ -54,22 +53,22 @@ public sealed class MyRouting : KestrelRouting
 	public MyRouting(RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse> options) : base(options)
 	{
 		// write a view using Routable.Views.Simple.
-		Add(_ => _.Get("/").Do(async (ctx, req, resp) => await resp.WriteViewAsync("index", new {
+		Add(_ => _.Get("/").DoAsync(async (ctx, req, resp) => await resp.WriteViewAsync("index", new {
 			SomeModelField = "Widget widget"
 		})));
 
-		Add(_ => _.Get("/test").Do(async (ctx, req, resp) => await resp.WriteAsync("Hello World!")));
+		Add(_ => _.Get("/test").Do((ctx, req, resp) => resp.Write("Hello World!")));
 		Add(_ => _.Post("/test").Try(OnTestPost));
 
-		Add(_ => _.Get("/json").Do(async (ctx, req, resp) => await resp.WriteAsync(JObject.FromObject(new {
+		Add(_ => _.Get("/json").Do((ctx, req, resp) => resp.Write(JObject.FromObject(new {
 			Field1 = 1,
 			Field2 = "string?"
 		}))));
 	}
-	
-	private async Task<bool> OnTestPost(KestrelRoutableContext ctx, KestrelRoutableRequest req, KestrelRoutableResponse resp) {
+
+	private bool OnTestPost(KestrelRoutableContext ctx, KestrelRoutableRequest req, KestrelRoutableResponse resp) {
 		if(req.Form.TryGetValue("my-parameter", out var value) == true) {
-			await resp.WriteAsync($"Value: {value.FirstOrDefault() ?? "<null>"}");
+			resp.Write($"Value: {value.FirstOrDefault() ?? "<null>"}");
 			return true;
 		} else {
 			return false;
