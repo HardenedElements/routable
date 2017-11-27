@@ -30,19 +30,11 @@ namespace Routable
 		/// Handles any response type not handled by a configured response type handler.
 		/// </summary>
 		public virtual ResponseTypeHandler<TContext, TRequest, TResponse> DefaultResponseHandler { get; } = DefaultResponseTypeHandlers.StringResponseTypeHandler;
-		private List<Routing<TContext, TRequest, TResponse>> _Routing = new List<Routing<TContext, TRequest, TResponse>>();
-		/// <summary>
-		/// A list of all configured routing instances.
-		/// </summary>
-		public virtual IReadOnlyList<Routing<TContext, TRequest, TResponse>> Routing => _Routing;
+		private Dictionary<RoutableEventPipelines, IList<Routing<TContext, TRequest, TResponse>>> Routing = new Dictionary<RoutableEventPipelines, IList<Routing<TContext, TRequest, TResponse>>>();
 		/// <summary>
 		/// Factory used to create routes when routes are authored.
 		/// </summary>
 		public virtual RouteFactory<TContext, TRequest, TResponse> RouteFactory { get; set; } = new RouteFactory<TContext, TRequest, TResponse>();
-		/// <summary>
-		/// Handles unhandled errors.
-		/// </summary>
-		public virtual AsyncRoutableErrorAction<TContext, TRequest, TResponse> ErrorHandler { get; set; }
 		private Dictionary<Type, object> FeatureOptions = new Dictionary<Type, object>();
 		public ILogger Logger { get; protected set; } = new DefaultConsoleLogger();
 
@@ -52,30 +44,144 @@ namespace Routable
 			AddDefaultResponseTypeHandlers();
 		}
 
+		private async Task<bool> InvokeRouting(RoutableEventPipelines eventPipeline, TContext context, bool ignoreCompletion)
+		{
+			// obtain list of routing objects.
+			IList<Routing<TContext, TRequest, TResponse>> routing;
+			lock(Routing) {
+				if(Routing.TryGetValue(eventPipeline, out routing) == false) {
+					return false;
+				}
+			}
+
+			// obtain a snapshot of the routes.
+			var routeCollections = new List<List<Route<TContext, TRequest, TResponse>>>();
+			lock(routing) {
+				foreach(var r in routing) {
+					routeCollections.Add(r.Routes.Where(_ => _.IsMatch(context)).ToList());
+				}
+			}
+
+			// invoke each route until one succeeds (unless ignoreCompletion).
+			bool wasCompletedSuccessfully = false;
+			foreach(var routeCollection in routeCollections) {
+				foreach(var route in routeCollection) {
+					if(await route.Invoke(context) == true) {
+						if(ignoreCompletion == true) {
+							wasCompletedSuccessfully = true;
+							break;
+						} else {
+							return true;
+						}
+					}
+				}
+			}
+
+			return wasCompletedSuccessfully;
+		}
 		protected async Task<bool> InvokeRouting(TContext context)
 		{
-			foreach(var route in Routing.SelectMany(_ => _.Routes).Where(_ => _.IsMatch(context))) {
-				if(await route.Invoke(context) == true) {
+			try {
+				bool wasRequestHandled = false;
+
+				do {
+					// invoke initialize routes.
+					if(await InvokeRouting(RoutableEventPipelines.RouteEventInitialize, context, false) == true) {
+						wasRequestHandled = true;
+						break;
+					}
+
+					// invoke main routes.
+					if(await InvokeRouting(RoutableEventPipelines.RouteEventMain, context, false) == true) {
+						wasRequestHandled = true;
+						break;
+					}
+				} while(false);
+
+				if(wasRequestHandled == true) {
+					// invoke finalize routes.
+					await InvokeRouting(RoutableEventPipelines.RouteEventFinalize, context, true);
+					await context.Response.Finalize();
+					return true;
+				} else {
+					// invoke unhandled route finalizer.
+					if(await InvokeRouting(RoutableEventPipelines.RouteEventFinalizeUnhandledRequests, context, false) == true) {
+						// in that case, invoke finalize routes.
+						await InvokeRouting(RoutableEventPipelines.RouteEventFinalize, context, true);
+						await context.Response.Finalize();
+						return true;
+					}
+				}
+			} catch(Exception ex) {
+				// invoke error handling routes.
+				context.Error = ex;
+				context.Response.ClearPendingWrites();
+				if(await InvokeRouting(RoutableEventPipelines.RouteEventError, context, true) == true) {
+					await context.Response.Finalize();
 					return true;
 				}
 			}
+
 			return false;
 		}
 
+		private IList<Routing<TContext, TRequest, TResponse>> GetEventPipelineRouting(RoutableEventPipelines eventPipeline)
+		{
+			lock(Routing) {
+				if(Routing.TryGetValue(eventPipeline, out var list) == false) {
+					list = new List<Routing<TContext, TRequest, TResponse>>();
+					Routing.Add(eventPipeline, list);
+					return list;
+				} else {
+					return list;
+				}
+			}
+		}
 		/// <summary>
 		/// Add a routing instance to handle requests.
 		/// </summary>
 		public RoutableOptions<TContext, TRequest, TResponse> AddRouting(Routing<TContext, TRequest, TResponse> routing)
 		{
-			_Routing.Add(routing);
+			var list = GetEventPipelineRouting(RoutableEventPipelines.RouteEventMain);
+			lock(list) {
+				list.Add(routing);
+			}
+			return this;
+		}
+		/// <summary>
+		/// Synonym for AppendRoutingToEventPipeline.
+		/// </summary>
+		public RoutableOptions<TContext, TRequest, TResponse> AddRouting(RoutableEventPipelines eventPipeline, Routing<TContext, TRequest, TResponse> routing) => AppendRoutingToEventPipeline(eventPipeline, routing);
+		/// <summary>
+		/// Append a routing instance to handle requests to the specified pipeline.
+		/// </summary>
+		/// <seealso cref="RoutableEventPipelines"/>
+		public RoutableOptions<TContext, TRequest, TResponse> AppendRoutingToEventPipeline(RoutableEventPipelines eventPipeline, Routing<TContext, TRequest, TResponse> routing)
+		{
+			var list = GetEventPipelineRouting(eventPipeline);
+			lock(list) {
+				list.Add(routing);
+			}
+			return this;
+		}
+		/// <summary>
+		/// Prepend a routing instance to handle requests to the specified pipeline.
+		/// </summary>
+		/// <seealso cref="RoutableEventPipelines"/>
+		public RoutableOptions<TContext, TRequest, TResponse> PrependRoutingToEventPipeline(RoutableEventPipelines eventPipeline, Routing<TContext, TRequest, TResponse> routing)
+		{
+			var list = GetEventPipelineRouting(eventPipeline);
+			lock(list) {
+				list.Insert(0, routing);
+			}
 			return this;
 		}
 		/// <summary>
 		/// Set handler for unhandled errors.
 		/// </summary>
-		public RoutableOptions<TContext, TRequest, TResponse> OnError(AsyncRoutableErrorAction<TContext, TRequest, TResponse> action)
+		public RoutableOptions<TContext, TRequest, TResponse> OnError(Routing<TContext, TRequest, TResponse> routing)
 		{
-			ErrorHandler = action;
+			AppendRoutingToEventPipeline(RoutableEventPipelines.RouteEventError, routing);
 			return this;
 		}
 		/// <summary>

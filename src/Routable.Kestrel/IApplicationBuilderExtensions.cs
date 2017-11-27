@@ -18,15 +18,10 @@ namespace Routable.Kestrel
 
 			// when invoked, run routes.
 			@this.Use(async (context, next) => {
-				KestrelRoutableContext routableContext = null;
-				try {
-					routableContext = new KestrelRoutableContext(options, context);
-					if(await options.Invoke(routableContext) == false) {
-						await next();
-						return;
-					}
-				} catch(Exception exception) {
-					await options.ErrorHandler(routableContext, exception);
+				var routableContext = new KestrelRoutableContext(options, context);
+				if(await options.Invoke(routableContext) == false) {
+					await next();
+					return;
 				}
 			});
 			return @this;

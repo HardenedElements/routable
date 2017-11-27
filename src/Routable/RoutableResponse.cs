@@ -45,24 +45,23 @@ namespace Routable
 		/// Platform agnostic response attributes
 		/// </summary>
 		public abstract AbstractResponseAttributes Attributes { get; }
+		private List<Func<RoutableContext<TContext, TRequest, TResponse>, Stream, Task>> ContentWriters = new List<Func<RoutableContext<TContext, TRequest, TResponse>, Stream, Task>>();
 
 		private RoutableResponse() { }
 		internal RoutableResponse(TContext context) => Context = context;
 
 		/// <summary>
-		/// Write directly to the response stream.
+		/// Write directly to the response stream after the request has been finalized.
 		/// </summary>
 		/// <param name="writer">A function that when evaluated writes the response to the stream provided.</param>
-		/// <returns>Task to be completed once the response has been written.</returns>
-		public abstract Task WriteAsync(Func<Stream, Task> writer);
+		public virtual void Write(Func<RoutableContext<TContext, TRequest, TResponse>, Stream, Task> writer) => ContentWriters.Add(writer);
 		/// <summary>
-		/// Write a value as a response.
+		/// Write a value as a response after the request has been finalized.
 		/// </summary>
-		/// <returns>Task to be completed once the response has been written.</returns>
-		public virtual Task WriteAsync<T>(T value)
+		public virtual void Write<T>(T value)
 		{
 			if(value == null) {
-				return Context.Options.EmptyResponseHandler(Context, null);
+				Context.Options.EmptyResponseHandler(Context, null);
 			} else {
 				if(Context.Options.ResponseTypeHandlers.TryGetHandler(typeof(T), out var handler) == false) {
 					if(Context.Options.DefaultResponseHandler != null) {
@@ -74,10 +73,24 @@ namespace Routable
 					}
 				}
 
-				return handler(Context, value);
+				handler(Context, value);
 			}
 		}
+		/// <summary>
+		/// Clear pending writes. This should not be used outside of exceptional circumstances as writers may have IDisposable calls within them.
+		/// </summary>
+		public virtual void ClearPendingWrites() => ContentWriters.Clear();
+
 		public abstract Task Redirect(string location);
+
+		/// <summary>
+		/// The implementer is expected to invoke the provided writers against a stream that will transmit content to the
+		/// calling user agent.
+		/// </summary>
+		/// <param name="writers">Functions that wish to write content to the user agent</param>
+		/// <returns>A task that completes when finalization is complete and the response has ended.</returns>
+		protected abstract Task Finalize(IReadOnlyList<Func<RoutableContext<TContext, TRequest, TResponse>, Stream, Task>> writers);
+		internal async Task Finalize() => await Finalize(ContentWriters);
 	}
 	public abstract class RoutableResponse<TContext, TRequest, TResponse, TStatus, TCookies, THeaders, TContentType, TContentLength, TBody> : RoutableResponse<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>
