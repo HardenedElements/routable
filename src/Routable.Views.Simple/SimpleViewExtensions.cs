@@ -68,7 +68,7 @@ namespace Routable.Views.Simple
 			@this.Write(async (context, stream) => {
 				context.Response.Attributes.ContentType = view.MimeType;
 				using(var writer = new StreamWriter(stream, context.Options.StringEncoding)) {
-					await view.TryRender(writer, model);
+					await view.TryRender(name, writer, model);
 				}
 			});
 		}

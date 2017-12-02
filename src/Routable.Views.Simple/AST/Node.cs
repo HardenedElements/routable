@@ -1,3 +1,4 @@
+using Sprache;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,6 +20,16 @@ namespace Routable.Views.Simple.AST
 		{
 			Options = options;
 			ViewOptions = viewOptions;
+		}
+
+		protected static Parser<string> ViewNameParser => Parse.LetterOrDigit.Or(CharSetParser('.', '-', '_', ' ', ',', '/', '\\')).Many().Text();
+		protected static Parser<char> CharSetParser(params char[] chars)
+		{
+			Parser<char> parser = null;
+			foreach(var ch in chars) {
+				parser = parser == null ? Parse.Char(ch) : parser.Or(Parse.Char(ch));
+			}
+			return parser;
 		}
 
 		public abstract Task<bool> TryRender(StreamWriter writer, RenderContext<TContext, TRequest, TResponse> context);

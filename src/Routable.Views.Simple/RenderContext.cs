@@ -1,3 +1,4 @@
+using Routable.Views.Simple.AST;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,12 +13,15 @@ namespace Routable.Views.Simple
 		protected RoutableOptions<TContext, TRequest, TResponse> Options { get; private set; }
 		protected SimpleViewOptions<TContext, TRequest, TResponse> ViewOptions { get; private set; }
 
+		public string ViewName { get; set; }
 		private Stack<object> ModelStack = new Stack<object>();
 		public object Model => ModelStack.Any() ? ModelStack.Peek() : null;
 		private Dictionary<object, IDictionary<string, object>> Cache = new Dictionary<object, IDictionary<string, object>>();
+		public Stack<List<Node<TContext, TRequest, TResponse>>> ChildrenStack { get; set; } = new Stack<List<Node<TContext, TRequest, TResponse>>>();
 
-		public RenderContext(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions)
+		public RenderContext(string viewName, RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions)
 		{
+			ViewName = viewName;
 			Options = options;
 			ViewOptions = viewOptions;
 		}

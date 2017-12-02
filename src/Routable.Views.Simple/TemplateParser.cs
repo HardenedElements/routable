@@ -30,8 +30,11 @@ namespace Routable.Views.Simple
 				IncludeNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
 				ModelNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
 				RootNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
-				ContentNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions)
-			};
+				ParentNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
+				ChildNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions)
+			}
+			.Concat(ViewOptions.CustomExpressionParsers.Select(_ => _.Select(e => new CustomExpressionNode<TContext, TRequest, TResponse>(Options, ViewOptions, e))))
+			.Concat(new[] { ContentNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions) });
 		}
 		private Parser<IEnumerable<IEnumerable<Node<TContext, TRequest, TResponse>>>> GetParser()
 		{
@@ -45,25 +48,36 @@ namespace Routable.Views.Simple
 			}
 			return current.Many().Many();
 		}
-		private IEnumerable<Node<TContext, TRequest, TResponse>> RollupNodes(Node<TContext, TRequest, TResponse>[] symbols, ref int index)
+		private IEnumerable<Node<TContext, TRequest, TResponse>> RollupNodes(string name, Node<TContext, TRequest, TResponse>[] symbols, ref int index)
 		{
+			ParentNode<TContext, TRequest, TResponse> parent = null;
 			var output = new List<Node<TContext, TRequest, TResponse>>();
 			while(index < symbols.Length) {
 				var symbol = symbols[index];
 				index++;
 				if(symbol is IfSetNode<TContext, TRequest, TResponse>) {
-					symbol.Children.AddRange(RollupNodes(symbols, ref index));
+					symbol.Children.AddRange(RollupNodes(name, symbols, ref index));
 					output.Add(symbol);
 				} else if(symbol is ForEachNode<TContext, TRequest, TResponse>) {
-					symbol.Children.AddRange(RollupNodes(symbols, ref index));
+					symbol.Children.AddRange(RollupNodes(name, symbols, ref index));
 					output.Add(symbol);
 				} else if(symbol is EndIfSetNode<TContext, TRequest, TResponse> || symbol is EndForEachNode<TContext, TRequest, TResponse>) {
 					return output;
+				} else if(symbol is ParentNode<TContext, TRequest, TResponse> parentNode) {
+					if(parent != null) {
+						throw new SimpleViewParserException(name, "Only one Parent() symbol allowed per template");
+					}
+					parent = parentNode;
 				} else {
 					output.Add(symbol);
 				}
 			}
-			return output;
+			if(parent != null) {
+				parent.Children.AddRange(output);
+				return new[] { parent };
+			} else {
+				return output;
+			}
 		}
 		public Template<TContext, TRequest, TResponse> TryParse(string name, DateTime? lastModified, string source)
 		{
@@ -75,7 +89,7 @@ namespace Routable.Views.Simple
 			// parse.
 			var parser = GetParser();
 			var index = 0;
-			var symbols = RollupNodes(parser.Parse(source).SelectMany(_ => _).ToArray(), ref index);
+			var symbols = RollupNodes(name, parser.Parse(source).SelectMany(_ => _).ToArray(), ref index);
 
 			// create and cache template.
 			template = new Template<TContext, TRequest, TResponse>(Options, ViewOptions, symbols);

@@ -34,9 +34,9 @@ namespace Routable.Views.Simple
 
 			return true;
 		}
-		public Task<bool> TryRender(StreamWriter writer, object model)
+		public Task<bool> TryRender(string viewName, StreamWriter writer, object model)
 		{
-			var context = new RenderContext<TContext, TRequest, TResponse>(Options, ViewOptions);
+			var context = new RenderContext<TContext, TRequest, TResponse>(viewName, Options, ViewOptions);
 			context.Push(model);
 			return TryRender(writer, context);
 		}

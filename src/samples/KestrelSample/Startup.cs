@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Net;
 
-namespace RoutableTest
+namespace KestrelSample
 {
 	public sealed class Startup
 	{
@@ -26,7 +26,16 @@ namespace RoutableTest
 						.WithJsonSupport()
 
 						// demo: add support for views.
-						.UseFileSystemViews(_ => _.AddSearchPath("views").OnUnresolvedModelValue((expr, paths, model) => $"[ERR! ({expr})]"))
+						.UseFileSystemViews(_ => {
+							// add custom expression to our views.
+							_.AddExpressionParser(ExampleExpression.Parser);
+
+							// configure the search path.
+							_.AddSearchPath("views");
+
+							// if a view requests a model that does not exist, use this string instead.
+							_.OnUnresolvedModelValue((expr, paths, model) => $"[ERR! ({expr})]");
+						})
 
 						// demo: add support for embedded views.
 						.UseEmbeddedViews(_ => _.AddAssembly(typeof(Startup).GetTypeInfo().Assembly, "KestrelSample.embedded_views"))
