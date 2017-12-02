@@ -1,3 +1,4 @@
+using Sprache;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,8 +30,12 @@ namespace Routable.Views.Simple
 		public RoutableOptions<TContext, TRequest, TResponse> RoutableOptions { get; private set; }
 		public event EventHandler<UnresolvedModelKeyEventArgs> ResolveUnresolvedModelKey;
 		public bool IsUnresolvedModelExpressionExceptional { get; set; } = false;
+		public int MaximumParentChildRecursionDepth { get; set; } = 32;
+		internal List<Parser<CustomExpression<TContext, TRequest, TResponse>>> CustomExpressionParsers = new List<Parser<CustomExpression<TContext, TRequest, TResponse>>>();
 
 		public SimpleViewOptions(RoutableOptions<TContext, TRequest, TResponse> options) => RoutableOptions = options;
+
+		public void AddExpressionParser(Parser<CustomExpression<TContext, TRequest, TResponse>> expressionParser) => CustomExpressionParsers.Add(expressionParser);
 
 		internal bool TryResolveUnresolvedModelKey(string expression, IEnumerable<string> pathComponents, object model, out object value)
 		{

@@ -11,7 +11,7 @@ namespace Routable.Views.Simple.AST
 	{
 		public static Parser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions) =>
 			from condOpen in Parse.Char('@').Then(_ => Parse.String("Include("))
-			from body in Parse.LetterOrDigit.Or(Parse.Char('.')).Or(Parse.Char('/')).Or(Parse.Char('\\')).Many().Text()
+			from body in ViewNameParser
 			from condClose in Parse.Char(')')
 			select new IncludeNode<TContext, TRequest, TResponse>(options, viewOptions, body);
 		public string ViewName { get; private set; }

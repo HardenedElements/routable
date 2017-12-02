@@ -6,7 +6,7 @@ using Routable.Kestrel;
 using Routable.Views.Simple;
 using System;
 
-namespace RoutableTest
+namespace KestrelSample
 {
 	public sealed class MyRouting : KestrelRouting
 	{
@@ -23,6 +23,11 @@ namespace RoutableTest
 				People = people
 			})));
 			Add(_ => _.Get("/no-model").DoAsync(async (ctx, req, resp) => await resp.WriteViewAsync("index")));
+
+			// test rendering parent-child views.
+			Add(_ => _.Get("/parent").DoAsync(async (ctx, req, resp) => await resp.WriteViewAsync("parent")));
+			Add(_ => _.Get("/child").DoAsync(async (ctx, req, resp) => await resp.WriteViewAsync("child")));
+			Add(_ => _.Get("/loop-child").DoAsync(async (ctx, req, resp) => await resp.WriteViewAsync("loop-child")));
 
 			// write an embedded view
 			Add(_ => _.Get("/embedded").DoAsync(async (ctx, req, resp) => await resp.WriteViewAsync("test/embed", new {

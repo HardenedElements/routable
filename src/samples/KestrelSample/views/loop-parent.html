@@ -1,0 +1,14 @@
+@Parent(loop-parent)
+<!DOCTYPE html>
+<html>
+<head>
+	@Include(test/head)
+</head>
+<body>
+	<h1>This is the parent node that recurses an awful lot</h1>
+	<div id="child-content">
+		@Child
+	</div>
+	<h1>Those were some child nodes.</h1>
+</body>
+</html>
