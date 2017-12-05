@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 
 namespace Routable
 {
@@ -43,6 +44,12 @@ namespace Routable
 		/// If an exception was thrown while processing this request, this value will be set.
 		/// </summary>
 		public Exception Error { get; internal set; }
+
+		private CancellationToken _CancellationToken = CancellationToken.None;
+		/// <summary>
+		/// Cancellation token that indicates the request is to be aborted. If supported by the platform, otherwise it will be set to CancellationToken.None.
+		/// </summary>
+		public virtual CancellationToken CancellationToken => _CancellationToken;
 	}
 	public abstract class RoutableContext<TPlatformContext, TContext, TRequest, TResponse, TUser, TPerRequestItems> : RoutableContext<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>

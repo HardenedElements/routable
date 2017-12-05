@@ -11,7 +11,7 @@
     <Description>Use Routable with the Kestrel HTTP server</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.1.2</Version>
+    <Version>1.1.3</Version>
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Routable\Routable.csproj" />

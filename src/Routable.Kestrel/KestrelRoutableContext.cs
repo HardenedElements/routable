@@ -6,6 +6,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 
 namespace Routable.Kestrel
 {
@@ -32,6 +33,7 @@ namespace Routable.Kestrel
 		public override KestrelRoutableResponse Response => _Response;
 		public override ClaimsPrincipal User { get => PlatformContext.User; set => PlatformContext.User = value; }
 		public override IDictionary<object, object> PerRequestItems => PlatformContext.Items;
+		public override CancellationToken CancellationToken => PlatformContext.RequestAborted;
 
 		internal KestrelRoutableContext(RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse> options, Microsoft.AspNetCore.Http.HttpContext platformContext)
 			: base(options)
