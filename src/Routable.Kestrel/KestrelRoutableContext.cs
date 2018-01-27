@@ -7,9 +7,19 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
+using System.Security.Principal;
 
 namespace Routable.Kestrel
 {
+	internal class KestrelContextAbstractAttributes : AbstractContextAttributes
+	{
+		private KestrelRoutableContext Context;
+		public KestrelContextAbstractAttributes(KestrelRoutableContext context) => Context = context;
+
+		public override void RemovePerRequestItem(string name) => Context.PerRequestItems.Remove(name);
+		public override void SetPerRequestItem(string name, object value) => Context.PerRequestItems[name] = value;
+		public override bool TryGetPerRequestItem(string name, out object value) => Context.PerRequestItems.TryGetValue(name, out value);
+	}
 	public class KestrelRoutableContext : RoutableContext<
 		Microsoft.AspNetCore.Http.HttpContext,
 		KestrelRoutableContext,
@@ -31,14 +41,28 @@ namespace Routable.Kestrel
 		public override KestrelRoutableRequest Request => _Request;
 		private KestrelRoutableResponse _Response;
 		public override KestrelRoutableResponse Response => _Response;
+		public override IPrincipal Principal
+		{
+			get => PlatformContext.User;
+			set {
+				if(value == null || value is ClaimsPrincipal) {
+					PlatformContext.User = (value as ClaimsPrincipal);
+				} else {
+					throw new NotSupportedException($"Kestrel principals must be of {nameof(ClaimsPrincipal)} type");
+				}
+			}
+		}
 		public override ClaimsPrincipal User { get => PlatformContext.User; set => PlatformContext.User = value; }
 		public override IDictionary<object, object> PerRequestItems => PlatformContext.Items;
 		public override CancellationToken CancellationToken => PlatformContext.RequestAborted;
+		private KestrelContextAbstractAttributes _Abstract;
+		public override AbstractContextAttributes Abstract => _Abstract;
 
 		internal KestrelRoutableContext(RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse> options, Microsoft.AspNetCore.Http.HttpContext platformContext)
 			: base(options)
 		{
 			_PlatformContext = platformContext;
+			_Abstract = new KestrelContextAbstractAttributes(this);
 			_Request = new KestrelRoutableRequest(this);
 			_Response = new KestrelRoutableResponse(this);
 		}
