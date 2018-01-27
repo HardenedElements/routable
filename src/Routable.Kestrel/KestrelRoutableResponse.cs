@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Routable.Kestrel
 {
-	public class KestrelResponseAttributes : AbstractResponseAttributes
+	public class KestrelResponseAbstractAttributes : AbstractResponseAttributes
 	{
 		private KestrelRoutableResponse Response;
 
@@ -32,7 +32,7 @@ namespace Routable.Kestrel
 			Response.Headers.Add(name, new Microsoft.Extensions.Primitives.StringValues(value));
 		}
 
-		internal KestrelResponseAttributes(KestrelRoutableResponse response) => Response = response;
+		internal KestrelResponseAbstractAttributes(KestrelRoutableResponse response) => Response = response;
 	}
 	public class KestrelRoutableResponse : RoutableResponse<
 		KestrelRoutableContext,
@@ -46,8 +46,8 @@ namespace Routable.Kestrel
 		Stream>
 	{
 		public Microsoft.AspNetCore.Http.HttpResponse PlatformResponse => Context.PlatformContext.Response;
-		private AbstractResponseAttributes _Attributes;
-		public override AbstractResponseAttributes Attributes => _Attributes;
+		private AbstractResponseAttributes _Abstract;
+		public override AbstractResponseAttributes Abstract => _Abstract;
 		public override int Status { get => PlatformResponse.StatusCode; set => PlatformResponse.StatusCode = value; }
 		public override string Reason { get => throw new NotSupportedException(); set => new NotSupportedException(); }
 		public override Microsoft.AspNetCore.Http.IResponseCookies Cookies { get => PlatformResponse.Cookies; set => throw new NotSupportedException(); }
@@ -58,7 +58,7 @@ namespace Routable.Kestrel
 
 		internal KestrelRoutableResponse(KestrelRoutableContext context) : base(context)
 		{
-			_Attributes = new KestrelResponseAttributes(this);
+			_Abstract = new KestrelResponseAbstractAttributes(this);
 		}
 
 		public override Task Redirect(string location)

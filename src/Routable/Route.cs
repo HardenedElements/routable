@@ -13,10 +13,13 @@ namespace Routable
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
+		public RoutableOptions<TContext, TRequest, TResponse> RoutableOptions { get; private set; }
 		protected List<RouteAction<TContext, TRequest, TResponse>> Actions = new List<RouteAction<TContext, TRequest, TResponse>>();
 
 		private IList<RoutePattern<TContext, TRequest, TResponse>> _Patterns = new List<RoutePattern<TContext, TRequest, TResponse>>();
 		private IReadOnlyList<RoutePattern<TContext, TRequest, TResponse>> Patterns => (IReadOnlyList<RoutePattern<TContext, TRequest, TResponse>>)_Patterns;
+
+		protected internal Route(RoutableOptions<TContext, TRequest, TResponse> options) => RoutableOptions = options;
 
 		/// <summary>
 		/// Determine if a route can handle a request context.

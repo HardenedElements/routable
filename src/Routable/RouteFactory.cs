@@ -18,6 +18,6 @@ namespace Routable
 		/// <summary>
 		/// Creates a new route.
 		/// </summary>
-		public virtual Route<TContext, TRequest, TResponse> Create() => new Route<TContext, TRequest, TResponse>();
+		public virtual Route<TContext, TRequest, TResponse> Create(RoutableOptions<TContext, TRequest, TResponse> options) => new Route<TContext, TRequest, TResponse>(options);
 	}
 }

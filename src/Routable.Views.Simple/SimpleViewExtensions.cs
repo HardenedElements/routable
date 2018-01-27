@@ -66,7 +66,7 @@ namespace Routable.Views.Simple
 		{
 			var view = await Template<TContext, TRequest, TResponse>.Find(@this.Context.Options, name);
 			@this.Write(async (context, stream) => {
-				context.Response.Attributes.ContentType = view.MimeType;
+				context.Response.Abstract.ContentType = view.MimeType;
 				using(var writer = new StreamWriter(stream, context.Options.StringEncoding)) {
 					await view.TryRender(name, writer, model);
 				}

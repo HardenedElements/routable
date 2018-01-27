@@ -15,7 +15,7 @@ namespace Routable.Json
 			where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 			where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 		{
-			context.Response.Attributes.ContentType = "application/json";
+			context.Response.Abstract.ContentType = "application/json";
 
 			if(value == null) {
 				context.Response.Write("");

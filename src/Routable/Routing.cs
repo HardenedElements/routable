@@ -38,7 +38,7 @@ namespace Routable
 		/// <param name="builder">An action used to construct a single route</param>
 		public void Add(Action<Route<TContext, TRequest, TResponse>> builder)
 		{
-			var route = Options.RouteFactory.Create();
+			var route = Options.RouteFactory.Create(Options);
 			builder(route);
 			_Routes.Add(route);
 		}

@@ -42,9 +42,9 @@ namespace Routable
 		/// </summary>
 		public TContext Context { get; private set; }
 		/// <summary>
-		/// Platform agnostic response attributes
+		/// Platform agnostic access to response attributes
 		/// </summary>
-		public abstract AbstractResponseAttributes Attributes { get; }
+		public abstract AbstractResponseAttributes Abstract { get; }
 		private List<Func<RoutableContext<TContext, TRequest, TResponse>, Stream, Task>> ContentWriters = new List<Func<RoutableContext<TContext, TRequest, TResponse>, Stream, Task>>();
 
 		private RoutableResponse() { }

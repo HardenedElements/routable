@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Routable.Kestrel
 {
-	public class KestrelRequestAttributes : AbstractRequestAttributes
+	public class KestrelRequestAbstractAttributes : AbstractRequestAttributes
 	{
 		private KestrelRoutableRequest Request;
 
@@ -25,6 +25,34 @@ namespace Routable.Kestrel
 				return false;
 			}
 		}
+		public override bool TryGetForm(string name, out IEnumerable<string> value)
+		{
+			if(Request.PlatformRequest.HasFormContentType == false) {
+				value = null;
+				return false;
+			}
+
+			try {
+				if(Request.Form.TryGetValue(name, out var values) == true) {
+					value = values;
+					return true;
+				}
+			} catch(InvalidOperationException) {
+			} catch(InvalidDataException) { }
+
+			value = null;
+			return false;
+		}
+		public override bool TryGetQuery(string name, out IEnumerable<string> value)
+		{
+			if(Request.Query.TryGetValue(name, out var values) == true) {
+				value = values;
+				return true;
+			}
+
+			value = null;
+			return false;
+		}
 
 		public async override Task<string> GetBodyAsString(Encoding encoding = null)
 		{
@@ -33,7 +61,7 @@ namespace Routable.Kestrel
 			}
 		}
 
-		internal KestrelRequestAttributes(KestrelRoutableRequest request) => Request = request;
+		internal KestrelRequestAbstractAttributes(KestrelRoutableRequest request) => Request = request;
 	}
 	public class KestrelRoutableRequest : RoutableRequest<
 		KestrelRoutableContext,
@@ -48,8 +76,8 @@ namespace Routable.Kestrel
 		Stream>
 	{
 		public Microsoft.AspNetCore.Http.HttpRequest PlatformRequest => Context.PlatformContext.Request;
-		private AbstractRequestAttributes _Attributes;
-		public override AbstractRequestAttributes Attributes => _Attributes;
+		private AbstractRequestAttributes _Abstract;
+		public override AbstractRequestAttributes Abstract => _Abstract;
 		public override string Method => PlatformRequest.Method;
 		private Uri _Uri;
 		public override Uri Uri
@@ -93,6 +121,6 @@ namespace Routable.Kestrel
 		public override long? ContentLength => PlatformRequest.ContentLength;
 		public override Stream Body => PlatformRequest.Body;
 
-		internal KestrelRoutableRequest(KestrelRoutableContext context) : base(context) => _Attributes = new KestrelRequestAttributes(this);
+		internal KestrelRoutableRequest(KestrelRoutableContext context) : base(context) => _Abstract = new KestrelRequestAbstractAttributes(this);
 	}
 }
