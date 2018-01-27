@@ -21,11 +21,11 @@ namespace Routable
 		{
 			var bytes = value as byte[] ?? new byte[] { };
 			if(bytes.Length == 0) {
-				context.Response.Attributes.ContentLength = 0;
+				context.Response.Abstract.ContentLength = 0;
 				return;
 			}
 
-			context.Response.Attributes.ContentLength = bytes.Length;
+			context.Response.Abstract.ContentLength = bytes.Length;
 			context.Response.Write(async (ctx, stream) => await stream.WriteAsync(bytes, 0, bytes.Length));
 		}
 		public static void StringResponseTypeHandler<TContext, TRequest, TResponse>(RoutableContext<TContext, TRequest, TResponse> context, object value)
@@ -35,11 +35,11 @@ namespace Routable
 		{
 			var bytes = value == null ? new byte[] { } : context.Options.StringEncoding.GetBytes(value is string ? (string)value : value.ToString());
 			if(bytes.Length == 0) {
-				context.Response.Attributes.ContentLength = 0;
+				context.Response.Abstract.ContentLength = 0;
 				return;
 			}
 
-			context.Response.Attributes.ContentLength = bytes.Length;
+			context.Response.Abstract.ContentLength = bytes.Length;
 			context.Response.Write(async (ctx, stream) => await stream.WriteAsync(bytes, 0, bytes.Length));
 		}
 	}

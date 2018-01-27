@@ -32,6 +32,20 @@ namespace Routable
 		/// </summary>
 		public abstract bool TryGetCookie(string name, out string value);
 		/// <summary>
+		/// Get a form parameter value, regardless of the platform.
+		/// </summary>
+		/// <param name="name">The name of the form parameter</param>
+		/// <param name="value">The value of the parameter if available</param>
+		/// <exception cref="NotSupportedException">Indicates the platform does not support this primitive</exception>
+		public abstract bool TryGetForm(string name, out IEnumerable<string> value);
+		/// <summary>
+		/// Get a query parameter value, regardless of the platform.
+		/// </summary>
+		/// <param name="name">The name of the query parameter</param>
+		/// <param name="value">The value of the parameter if available</param>
+		/// <exception cref="NotSupportedException">Indicates the platform does not support this primitive</exception>
+		public abstract bool TryGetQuery(string name, out IEnumerable<string> value);
+		/// <summary>
 		/// Get the body of the request as a string.
 		/// </summary>
 		/// <param name="encoding">Default is UTF-8</param>
@@ -62,9 +76,9 @@ namespace Routable
 		/// </summary>
 		public virtual IReadOnlyDictionary<string, object> Parameters => (IReadOnlyDictionary<string, object>)_Parameters;
 		/// <summary>
-		/// Platform agnostic response attributes
+		/// Platform agnostic access to request attributes
 		/// </summary>
-		public abstract AbstractRequestAttributes Attributes { get; }
+		public abstract AbstractRequestAttributes Abstract { get; }
 
 		protected RoutableRequest(TContext context) => Context = context;
 

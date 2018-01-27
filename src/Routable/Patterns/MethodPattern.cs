@@ -13,6 +13,6 @@ namespace Routable.Patterns
 
 		public MethodPattern(string method) => Method = method?.ToUpper();
 
-		public override bool IsMatch(TContext context) => context.Request.Attributes.Method?.ToUpper() == Method;
+		public override bool IsMatch(TContext context) => context.Request.Abstract.Method?.ToUpper() == Method;
 	}
 }
