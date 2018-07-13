@@ -1,0 +1,18 @@
+{
+	"$schema": "http://json.schemastore.org/template",
+	"author": "Hardened Elements",
+	"classifications": [
+		"Web",
+		"Routable"
+	],
+	"name": "Routable Basic",
+	"identity": "Routable.Templates.Basic",
+	"groupIdentity": "Routable.Templates",
+	"shortName": "routable-basic",
+	"tags": {
+		"language": "C#",
+		"type": "project"
+	},
+	"sourceName": "Routable.Templates.Basic",
+	"preferNameDirectory": true
+}

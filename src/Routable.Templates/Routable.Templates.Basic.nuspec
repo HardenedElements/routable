@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Routable.Templates.Basic</id>
+    <version>$version$</version>
+    <authors>Hardened Elements</authors>
+    <description>Template for basic Routable application using Kestrel</description>
+    <language>en-US</language>
+    <projectUrl>https://github.com/HardenedElements/routable</projectUrl>
+    <licenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</licenseUrl>
+		<iconUrl>http://www.hardenedelements.com/images/he-icon.png</iconUrl>
+    <copyright>Copyright 2017 - Midnight Source Inc.</copyright>
+    <tags>dotnet dotnet-core templates routable web-service web kestrel rest</tags>
+    <packageTypes>
+      <packageType name="Template" />
+    </packageTypes>
+  </metadata>
+  <files>
+    <file src="Routable.Templates.Basic/**" target="content/" />
+  </files>
+</package>
