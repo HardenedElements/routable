@@ -11,8 +11,8 @@
     <EmbeddedResource Include="embedded-views\test\embed.html" />
   </ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.1.3" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Routable.Json\Routable.Json.csproj" />

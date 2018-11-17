@@ -82,7 +82,7 @@ namespace Routable
 
 		protected RoutableRequest(TContext context) => Context = context;
 
-		internal void AddParameter(string name, object value) => _Parameters.Add(name, value);
+		internal void AddParameter(string name, object value) => _Parameters[name] = value;
 	}
 	public abstract class RoutableRequest<TContext, TRequest, TResponse, TMethod, TForm, TQuery, THeaders, ICookies, TContentLength, TBody> : RoutableRequest<TContext, TRequest, TResponse>
 		where TContext : RoutableContext<TContext, TRequest, TResponse>
