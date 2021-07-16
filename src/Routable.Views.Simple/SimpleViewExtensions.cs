@@ -67,9 +67,16 @@ namespace Routable.Views.Simple
 			var view = await Template<TContext, TRequest, TResponse>.Find(@this.Context.Options, name);
 			@this.Write(async (context, stream) => {
 				context.Response.Abstract.ContentType = view.MimeType;
+#if NETSTANDARD2_0
 				using(var writer = new StreamWriter(stream, context.Options.StringEncoding)) {
 					await view.TryRender(name, writer, model);
+					await writer.FlushAsync();
 				}
+#elif NETSTANDARD2_1_OR_GREATER
+				await using(var writer = new StreamWriter(stream, context.Options.StringEncoding)) {
+					await view.TryRender(name, writer, model);
+				}
+#endif
 			});
 		}
 	}

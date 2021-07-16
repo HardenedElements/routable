@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <PackageIconUrl>http://www.hardenedelements.com/images/he-icon.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/HardenedElements/routable</PackageProjectUrl>
     <PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
@@ -11,10 +11,10 @@
     <Description>Use Routable with simple model-view support</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.1.5</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Sprache" Version="2.2.0" />
+    <PackageReference Include="Sprache" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,10 @@
+{
+	"profiles": {
+		"KestrelSample": {
+			"commandName": "Project",
+			"launchBrowser": false,
+			"environmentVariables": {},
+			"externalUrlConfiguration": true
+		}
+	}
+}

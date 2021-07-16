@@ -10,14 +10,17 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Net;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace KestrelSample
 {
 	public sealed class Startup
 	{
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
-			var server = new WebHostBuilder()
+			using var server = new WebHostBuilder()
 				.UseKestrel(kestrelOptions => kestrelOptions
 					.Listen(IPAddress.Any, 8080)
 				)
@@ -88,8 +91,9 @@ namespace KestrelSample
 
 						// protip: each set of routing added to the finalize or error pipeline is executed.
 						.AddRouting(RoutableEventPipelines.RouteEventFinalize, new KestrelRouting(routable) {
-							_ => _.TryAsync(async (ctx, req, resp) => {
-								await Console.Error.WriteLineAsync($"({ctx.PerRequestItems["Marker"]}) Completed ({resp.Status})");
+							_ => _.Try((ctx, req, resp) => {
+								var logger = routable.GetApplicationServices().GetRequiredService<ILoggerFactory>().CreateLogger("sample");
+								logger.LogInformation($"({ctx.PerRequestItems["Marker"]}) Completed ({resp.Status})");
 								return false;
 							}),
 							_ => _.Do((ctx, req, resp) => resp.Headers.Add("X-TEST-TOO", "This finalizer will be called since the other was a Try with a false result."))
@@ -97,12 +101,13 @@ namespace KestrelSample
 
 						// we also have the privilege of intercepting unhandled requests and doing something with them.
 						.AddRouting(RoutableEventPipelines.RouteEventFinalizeUnhandledRequests, new KestrelRouting(routable) {
-							_ => _.TryAsync(async (ctx, req, resp) => {
+							_ => _.Try((ctx, req, resp) => {
+								var logger = routable.GetApplicationServices().GetRequiredService<ILoggerFactory>().CreateLogger("sample");
 								if(req.Query.ContainsKey("magic") == false) {
-									await Console.Error.WriteLineAsync($"({ctx.PerRequestItems["Marker"]}) was not handled.");
+									logger.LogInformation($"({ctx.PerRequestItems["Marker"]}) was not handled.");
 									return false;
 								} else {
-									await Console.Out.WriteLineAsync($"({ctx.PerRequestItems["Marker"]}) was not handled, but it's magic you see!.");
+									logger.LogInformation($"({ctx.PerRequestItems["Marker"]}) was not handled, but it's magic you see!.");
 									resp.Write("Magic!? Magic is for people with dark eyeliner... this is science.");
 									return true;
 								}
@@ -112,14 +117,15 @@ namespace KestrelSample
 						// demo: handle any exceptions.
 						.OnError(new KestrelRouting(routable) {
 							_ => _.DoAsync(async (context, request, response) => {
+								var logger = routable.GetApplicationServices().GetRequiredService<ILoggerFactory>().CreateLogger("sample");
 								response.Status = 500;
 								response.Write($"{context.Error?.GetType()?.FullName} ({context.Error?.Message}):\n\t{context.Error.StackTrace.Replace("\n", "\n\t")}\n");
-								await Console.Error.WriteLineAsync($"({context.PerRequestItems["Marker"]}) Error: {context.Error?.GetType()?.FullName} ({context.Error?.Message}):\n\t{context.Error.StackTrace.Replace("\n", "\n\t")}\n");
+								logger.LogError($"({context.PerRequestItems["Marker"]}) Error: {context.Error?.GetType()?.FullName} ({context.Error?.Message})", context.Error);
 							})
 						})
 					)
 					// and of course, if a request is not handled, another kestrel hook can run it (or.. another routable!)
-					.Use(async (context, next) => {
+					.Use(async (HttpContext context, RequestDelegate next) => {
 						// of course we could handle 404's in routable, but I just want to show how other things continue to function :)
 						context.Response.StatusCode = 404;
 						context.Response.ContentType = "text/plain";
@@ -128,11 +134,22 @@ namespace KestrelSample
 						await context.Response.WriteAsync($"[You've been awarded the priceless ({ context.Items["Marker"]}), keep it safe!]");
 					})
 				)
+				// log kestrel output to console (remove to disable)
+				.ConfigureLogging(logging => {
+					logging.ClearProviders();
+					logging.AddConsole();
+				})
 				.Build();
 
-			using(server) {
-				server.Run();
-			}
+			// shutdown on user (^C / SIGINT) request.
+			using var cancellationSource = new CancellationTokenSource();
+			Console.CancelKeyPress += (_, e) => {
+				cancellationSource.Cancel();
+				e.Cancel = true;
+			};
+
+			// run until cancelled.
+			await server.RunAsync(cancellationSource.Token);
 		}
 	}
 }

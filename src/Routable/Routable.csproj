@@ -11,6 +11,6 @@
     <Description>Routable is a simple, easy to use, request routing library. It is platform agnostic and designed to easily integrate with whatever platform you prefer.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.1.5</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 </Project>

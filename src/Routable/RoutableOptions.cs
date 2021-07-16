@@ -36,7 +36,7 @@ namespace Routable
 		/// </summary>
 		public virtual RouteFactory<TContext, TRequest, TResponse> RouteFactory { get; set; } = new RouteFactory<TContext, TRequest, TResponse>();
 		private Dictionary<Type, object> FeatureOptions = new Dictionary<Type, object>();
-		public ILogger Logger { get; protected set; } = new DefaultConsoleLogger();
+		public IRoutableLogger Logger { get; protected set; } = new DefaultConsoleLogger();
 
 		protected RoutableOptions()
 		{
@@ -187,7 +187,7 @@ namespace Routable
 		/// <summary>
 		/// Set a different logger than the default.
 		/// </summary>
-		public RoutableOptions<TContext, TRequest, TResponse> UseLogger(ILogger logger)
+		public RoutableOptions<TContext, TRequest, TResponse> UseLogger(IRoutableLogger logger)
 		{
 			Logger = logger;
 			return this;

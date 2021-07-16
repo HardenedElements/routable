@@ -1,23 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Routable
 {
-	public enum LogClass
-	{
-		Debug,
-		Informational,
-		Warning,
-		Error,
-		Security
-	}
-	public interface ILogger
-	{
-		void Write(LogClass logClass, string message, Exception exception = null, IReadOnlyDictionary<string, string> data = null);
-	}
-	internal class DefaultConsoleLogger : ILogger
+	internal class DefaultConsoleLogger : IRoutableLogger
 	{
 		public void Write(LogClass logClass, string message, Exception exception, IReadOnlyDictionary<string, string> data)
 		{

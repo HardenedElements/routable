@@ -13,7 +13,7 @@ namespace Routable.Kestrel
 		public static IApplicationBuilder UseRoutable(this IApplicationBuilder @this, Action<RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse>> optionsSetter)
 		{
 			// set options.
-			var options = new KestrelRoutableOptions();
+			var options = new KestrelRoutableOptions(@this.ApplicationServices);
 			optionsSetter?.Invoke(options);
 
 			// when invoked, run routes.
