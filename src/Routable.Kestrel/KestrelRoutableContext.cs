@@ -11,15 +11,6 @@ using System.Security.Principal;
 
 namespace Routable.Kestrel
 {
-	internal class KestrelContextAbstractAttributes : AbstractContextAttributes
-	{
-		private KestrelRoutableContext Context;
-		public KestrelContextAbstractAttributes(KestrelRoutableContext context) => Context = context;
-
-		public override void RemovePerRequestItem(string name) => Context.PerRequestItems.Remove(name);
-		public override void SetPerRequestItem(string name, object value) => Context.PerRequestItems[name] = value;
-		public override bool TryGetPerRequestItem(string name, out object value) => Context.PerRequestItems.TryGetValue(name, out value);
-	}
 	public class KestrelRoutableContext : RoutableContext<
 		Microsoft.AspNetCore.Http.HttpContext,
 		KestrelRoutableContext,
@@ -58,7 +49,7 @@ namespace Routable.Kestrel
 		private KestrelContextAbstractAttributes _Abstract;
 		public override AbstractContextAttributes Abstract => _Abstract;
 
-		internal KestrelRoutableContext(RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse> options, Microsoft.AspNetCore.Http.HttpContext platformContext)
+		public KestrelRoutableContext(RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse> options, Microsoft.AspNetCore.Http.HttpContext platformContext)
 			: base(options)
 		{
 			_PlatformContext = platformContext;
