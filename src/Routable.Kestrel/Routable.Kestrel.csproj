@@ -11,7 +11,7 @@
     <Description>Use Routable with the Kestrel HTTP server</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
 		<LangVersion>8.0</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>

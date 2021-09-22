@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Routable.Kestrel
 {
-	internal partial class KestrelRoutableOptions : RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse>
+	public partial class KestrelRoutableOptions : RoutableOptions<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse>
 	{
 		public IServiceProvider ApplicationServices { get; private set; }
 
@@ -16,6 +16,6 @@ namespace Routable.Kestrel
 			}
 		}
 
-		internal Task<bool> Invoke(KestrelRoutableContext context) => InvokeRouting(context);
+		public Task<bool> Invoke(KestrelRoutableContext context) => InvokeRouting(context);
 	}
 }
