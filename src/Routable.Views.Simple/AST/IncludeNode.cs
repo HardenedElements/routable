@@ -1,6 +1,7 @@
-using Sprache;
 using System.IO;
 using System.Threading.Tasks;
+using Superpower;
+using Superpower.Parsers;
 
 namespace Routable.Views.Simple.AST
 {
@@ -9,11 +10,11 @@ namespace Routable.Views.Simple.AST
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
-		public static Parser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions) =>
-			from condOpen in Parse.Char('@').Then(_ => Parse.String("Include("))
+		public static TextParser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions) =>
+			from condOpen in Character.EqualTo('@').IgnoreThen(Span.EqualTo("Include("))
 			from body in ViewNameParser
-			from condClose in Parse.Char(')')
-			select new IncludeNode<TContext, TRequest, TResponse>(options, viewOptions, body);
+			from condClose in Character.EqualTo(')')
+			select (Node<TContext, TRequest, TResponse>)new IncludeNode<TContext, TRequest, TResponse>(options, viewOptions, body);
 		public string ViewName { get; private set; }
 
 		public IncludeNode(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions, string viewName) : base(options, viewOptions) => ViewName = viewName;

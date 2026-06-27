@@ -1,9 +1,10 @@
-using Sprache;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Superpower;
+using Superpower.Parsers;
 
 namespace Routable.Views.Simple.AST
 {
@@ -22,12 +23,12 @@ namespace Routable.Views.Simple.AST
 			ViewOptions = viewOptions;
 		}
 
-		protected static Parser<string> ViewNameParser => Parse.LetterOrDigit.Or(CharSetParser('.', '-', '_', ' ', ',', '/', '\\')).Many().Text();
-		protected static Parser<char> CharSetParser(params char[] chars)
+		protected static TextParser<string> ViewNameParser => Character.LetterOrDigit.Or(CharSetParser('.', '-', '_', ' ', ',', '/', '\\')).Many().Text();
+		protected static TextParser<char> CharSetParser(params char[] chars)
 		{
-			Parser<char> parser = null;
+			TextParser<char> parser = null;
 			foreach(var ch in chars) {
-				parser = parser == null ? Parse.Char(ch) : parser.Or(Parse.Char(ch));
+				parser = parser == null ? Character.EqualTo(ch) : parser.Or(Character.EqualTo(ch));
 			}
 			return parser;
 		}

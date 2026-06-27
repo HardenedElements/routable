@@ -1,27 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
-    <PackageIconUrl>http://www.hardenedelements.com/images/he-icon.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/HardenedElements/routable</PackageProjectUrl>
-    <PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
-    <Copyright>Copyright 2017 - Midnight Source Inc.</Copyright>
-    <PackageTags>routable.kestrel,routable,kestrel,routing,http</PackageTags>
-    <Authors>Hardened Elements</Authors>
-    <Company>Hardened Elements</Company>
-    <Description>Use Routable with the Kestrel HTTP server</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.2.1</Version>
-		<LangVersion>8.0</LangVersion>
+		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+		<PackageTags>routable.kestrel,routable,kestrel,routing,http</PackageTags>
+		<Description>Use Routable with the Kestrel HTTP server</Description>
 	</PropertyGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Routable\Routable.csproj" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.2.0" />
+	<ItemGroup>
+		<ProjectReference Include="..\Routable\Routable.csproj" />
 	</ItemGroup>
 </Project>

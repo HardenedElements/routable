@@ -1,9 +1,10 @@
-using Sprache;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Superpower;
+using Superpower.Parsers;
 
 namespace Routable.Views.Simple.AST
 {
@@ -12,11 +13,11 @@ namespace Routable.Views.Simple.AST
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
-		public static Parser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions) =>
-			from condOpen in Parse.Char('@').Then(_ => Parse.String("IfSet("))
-			from body in Parse.LetterOrDigit.Or(Parse.Char('.')).Many().Text()
-			from condClose in Parse.Char(')')
-			select new IfSetNode<TContext, TRequest, TResponse>(options, viewOptions, body);
+		public static TextParser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions) =>
+			from condOpen in Character.EqualTo('@').IgnoreThen(Span.EqualTo("IfSet("))
+			from body in Character.LetterOrDigit.Or(Character.EqualTo('.')).Many().Text()
+			from condClose in Character.EqualTo(')')
+			select (Node<TContext, TRequest, TResponse>)new IfSetNode<TContext, TRequest, TResponse>(options, viewOptions, body);
 		public string Expression { get; private set; }
 
 		public IfSetNode(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions, string expression) : base(options, viewOptions) => Expression = expression;

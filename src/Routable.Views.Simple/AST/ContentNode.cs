@@ -1,9 +1,10 @@
-using Sprache;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Superpower;
+using Superpower.Parsers;
 
 namespace Routable.Views.Simple.AST
 {
@@ -12,12 +13,12 @@ namespace Routable.Views.Simple.AST
 		where TRequest : RoutableRequest<TContext, TRequest, TResponse>
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
-		public static Parser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions)
+		public static TextParser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions)
 		{
-			var atSymbols = from at in Parse.Char('@').Many().Text()
+			var atSymbols = from at in Character.EqualTo('@').AtLeastOnce().Text()
 											select (Node<TContext, TRequest, TResponse>)new ContentNode<TContext, TRequest, TResponse>(options, viewOptions, at);
 
-			var contentSymbols = from before in Parse.CharExcept('@').Or(Parse.Char('\n')).Or(Parse.Char('\r')).Many().Text()
+			var contentSymbols = from before in Character.Except('@').Or(Character.EqualTo('\n')).Or(Character.EqualTo('\r')).AtLeastOnce().Text()
 													 select (Node<TContext, TRequest, TResponse>)new ContentNode<TContext, TRequest, TResponse>(options, viewOptions, before);
 
 			return atSymbols.Or(contentSymbols);

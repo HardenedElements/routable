@@ -11,6 +11,21 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# AI agents and similar tools
+/.agents/
+/.claude/
+/.codex/
+/.cursor/
+/.copilot/
+/.windsurf/
+/.aider/
+/.continue/
+/.opencode/
+/.claude*
+/.codex*
+/CLAUDE.md
+/AGENTS.md
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -22,6 +37,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+/artifacts/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -44,7 +60,6 @@ dlldata.c
 # DNX
 project.lock.json
 project.fragment.lock.json
-artifacts/
 
 *_i.c
 *_p.c

@@ -1,0 +1,40 @@
+<Project>
+	<!-- Single source of truth for the package version. The build script appends a
+	     commit-hash suffix on non-master branches. -->
+	<PropertyGroup>
+		<VersionPrefix>1.3.0</VersionPrefix>
+	</PropertyGroup>
+
+	<!-- Shared package metadata. -->
+	<PropertyGroup>
+		<Authors>Hardened Elements</Authors>
+		<Company>Hardened Elements</Company>
+		<Copyright>Copyright 2017 - Midnight Source Inc.</Copyright>
+		<PackageProjectUrl>https://github.com/HardenedElements/routable</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/HardenedElements/routable</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageIcon>icon.png</PackageIcon>
+	</PropertyGroup>
+
+	<!-- Reproducible builds. -->
+	<PropertyGroup>
+		<Deterministic>true</Deterministic>
+		<PathMap>$(MSBuildProjectDirectory)=.</PathMap>
+		<EmbedUntrackedSources>false</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+	</PropertyGroup>
+
+	<!-- Embed the package icon (ignored by non-packable projects). -->
+	<ItemGroup>
+		<None Include="$(MSBuildThisFileDirectory)assets/icon.png" Pack="true" PackagePath="" Visible="false" />
+	</ItemGroup>
+
+	<!-- Keep dotnet under WSL and Visual Studio from clobbering each other's output. -->
+	<PropertyGroup>
+		<_PlatformTag Condition="'$(OS)' == 'Windows_NT'">win</_PlatformTag>
+		<_PlatformTag Condition="'$(OS)' != 'Windows_NT'">linux</_PlatformTag>
+		<BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)bin\obj-$(_PlatformTag)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+		<BaseOutputPath>$(MSBuildThisFileDirectory)bin\bin-$(_PlatformTag)\$(MSBuildProjectName)\</BaseOutputPath>
+	</PropertyGroup>
+</Project>
