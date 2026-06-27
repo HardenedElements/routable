@@ -1,23 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <PackageIconUrl>http://www.hardenedelements.com/images/he-icon.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/HardenedElements/routable</PackageProjectUrl>
-    <PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
-    <Copyright>Copyright 2017 - Midnight Source Inc.</Copyright>
-    <PackageTags>routable.views.simple,routable.views,routable,views,routing,http</PackageTags>
-    <Authors>Hardened Elements</Authors>
-    <Company>Hardened Elements</Company>
-    <Description>Use Routable with simple model-view support</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.2.0</Version>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Sprache" Version="2.3.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Routable\Routable.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+		<PackageTags>routable.views.simple,routable.views,routable,views,routing,http</PackageTags>
+		<Description>Use Routable with simple model-view support</Description>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Superpower" Version="3.2.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Routable\Routable.csproj" />
+	</ItemGroup>
 </Project>

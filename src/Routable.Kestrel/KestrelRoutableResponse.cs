@@ -3,77 +3,78 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
-namespace Routable.Kestrel
+namespace Routable.Kestrel;
+
+public class KestrelResponseAbstractAttributes : AbstractResponseAttributes
 {
-	public class KestrelResponseAbstractAttributes : AbstractResponseAttributes
+	private KestrelRoutableResponse Response;
+
+	public override int StatusCode { get => Response.Status; set => Response.Status = value; }
+	public override long ContentLength { get => Response.ContentLength ?? 0; set => Response.ContentLength = value; }
+	public override string ContentType { get => Response.ContentType; set => Response.ContentType = value; }
+
+	public override void SetCookie(string name, string value, DateTime? expiration, bool httpOnly, bool isSecure, string domain, string path)
 	{
-		private KestrelRoutableResponse Response;
-
-		public override int StatusCode { get => Response.Status; set => Response.Status = value; }
-		public override long ContentLength { get => Response.ContentLength ?? 0; set => Response.ContentLength = value; }
-		public override string ContentType { get => Response.ContentType; set => Response.ContentType = value; }
-
-		public override void SetCookie(string name, string value, DateTime? expiration, bool httpOnly, bool isSecure, string domain, string path)
-		{
-			Response.Cookies.Append(name, value, new Microsoft.AspNetCore.Http.CookieOptions {
-				Expires = expiration == null ? (DateTimeOffset?)null : new DateTimeOffset(expiration.Value),
-				HttpOnly = httpOnly,
-				Secure = isSecure,
-				Domain = domain,
-				Path = path
-			});
-		}
-		public override void SetHeader(string name, string value)
-		{
-			if(Response.Headers.ContainsKey(name)) {
-				Response.Headers.Remove(name);
-			}
-			Response.Headers.Add(name, new Microsoft.Extensions.Primitives.StringValues(value));
-		}
-
-		internal KestrelResponseAbstractAttributes(KestrelRoutableResponse response) => Response = response;
+		Response.Cookies.Append(name, value, new Microsoft.AspNetCore.Http.CookieOptions {
+			Expires = expiration == null ? (DateTimeOffset?)null : new DateTimeOffset(expiration.Value),
+			HttpOnly = httpOnly,
+			Secure = isSecure,
+			Domain = domain,
+			Path = path
+		});
 	}
-	public class KestrelRoutableResponse : RoutableResponse<
-		KestrelRoutableContext,
-		KestrelRoutableRequest,
-		KestrelRoutableResponse,
-		int,
-		Microsoft.AspNetCore.Http.IResponseCookies,
-		Microsoft.AspNetCore.Http.IHeaderDictionary,
-		string,
-		long?,
-		Stream>
+	public override void SetHeader(string name, string value)
 	{
-		public Microsoft.AspNetCore.Http.HttpResponse PlatformResponse => Context.PlatformContext.Response;
-		private AbstractResponseAttributes _Abstract;
-		public override AbstractResponseAttributes Abstract => _Abstract;
-		public override int Status { get => PlatformResponse.StatusCode; set => PlatformResponse.StatusCode = value; }
-		public override string Reason { get => throw new NotSupportedException(); set => new NotSupportedException(); }
-		public override Microsoft.AspNetCore.Http.IResponseCookies Cookies { get => PlatformResponse.Cookies; set => throw new NotSupportedException(); }
-		public override Microsoft.AspNetCore.Http.IHeaderDictionary Headers { get => PlatformResponse.Headers; set => throw new NotSupportedException(); }
-		public override string ContentType { get => PlatformResponse.ContentType; set => PlatformResponse.ContentType = value; }
-		public override long? ContentLength { get => PlatformResponse.ContentLength; set => PlatformResponse.ContentLength = value; }
-		public override Stream Body { get => PlatformResponse.Body; set => throw new NotSupportedException(); }
-
-		internal KestrelRoutableResponse(KestrelRoutableContext context) : base(context)
-		{
-			_Abstract = new KestrelResponseAbstractAttributes(this);
+		if(Response.Headers.ContainsKey(name)) {
+			Response.Headers.Remove(name);
 		}
+		Response.Headers.Append(name, new Microsoft.Extensions.Primitives.StringValues(value));
+	}
 
-		public override Task Redirect(string location)
-		{
-			PlatformResponse.Redirect(location);
-			return Task.CompletedTask;
-		}
+	internal KestrelResponseAbstractAttributes(KestrelRoutableResponse response) => Response = response;
+}
+public class KestrelRoutableResponse : RoutableResponse<
+	KestrelRoutableContext,
+	KestrelRoutableRequest,
+	KestrelRoutableResponse,
+	int,
+	Microsoft.AspNetCore.Http.IResponseCookies,
+	Microsoft.AspNetCore.Http.IHeaderDictionary,
+	string,
+	long?,
+	Stream>
+{
+	public Microsoft.AspNetCore.Http.HttpResponse PlatformResponse => Context.PlatformContext.Response;
+	private AbstractResponseAttributes _Abstract;
+	public override AbstractResponseAttributes Abstract => _Abstract;
+	public override int Status { get => PlatformResponse.StatusCode; set => PlatformResponse.StatusCode = value; }
+	public override string Reason { get => throw new NotSupportedException(); set => new NotSupportedException(); }
+	public override Microsoft.AspNetCore.Http.IResponseCookies Cookies { get => PlatformResponse.Cookies; set => throw new NotSupportedException(); }
+	public override Microsoft.AspNetCore.Http.IHeaderDictionary Headers { get => PlatformResponse.Headers; set => throw new NotSupportedException(); }
+	public override string ContentType { get => PlatformResponse.ContentType; set => PlatformResponse.ContentType = value; }
+	public override long? ContentLength { get => PlatformResponse.ContentLength; set => PlatformResponse.ContentLength = value; }
+	public override Stream Body { get => PlatformResponse.Body; set => throw new NotSupportedException(); }
 
-		protected override async Task Finalize(IReadOnlyList<Func<RoutableContext<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse>, Stream, Task>> writers)
-		{
-			using(Body) {
-				foreach(var writer in writers) {
-					await writer(Context, Body);
-				}
+	internal KestrelRoutableResponse(KestrelRoutableContext context) : base(context)
+	{
+		_Abstract = new KestrelResponseAbstractAttributes(this);
+	}
+
+	public override Task Redirect(string location)
+	{
+		PlatformResponse.Redirect(location);
+		return Task.CompletedTask;
+	}
+
+	protected override async Task Finalize(IReadOnlyList<Func<RoutableContext<KestrelRoutableContext, KestrelRoutableRequest, KestrelRoutableResponse>, Stream, Task>> writers)
+	{
+		using(Body) {
+			foreach(var writer in writers) {
+				await writer(Context, Body);
 			}
 		}
 	}
 }
+

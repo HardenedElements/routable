@@ -1,6 +1,7 @@
-using Sprache;
 using System.IO;
 using System.Threading.Tasks;
+using Superpower;
+using Superpower.Parsers;
 
 namespace Routable.Views.Simple.AST
 {
@@ -10,11 +11,11 @@ namespace Routable.Views.Simple.AST
 		where TResponse : RoutableResponse<TContext, TRequest, TResponse>
 	{
 		private const int MaximumParentDepth = 32;
-		public static Parser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions) =>
-			from condOpen in Parse.Char('@').Then(_ => Parse.String("Parent("))
+		public static TextParser<Node<TContext, TRequest, TResponse>> GetParser(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions) =>
+			from condOpen in Character.EqualTo('@').IgnoreThen(Span.EqualTo("Parent("))
 			from body in ViewNameParser
-			from condClose in Parse.Char(')')
-			select new ParentNode<TContext, TRequest, TResponse>(options, viewOptions, body);
+			from condClose in Character.EqualTo(')')
+			select (Node<TContext, TRequest, TResponse>)new ParentNode<TContext, TRequest, TResponse>(options, viewOptions, body);
 		public string ViewName { get; private set; }
 
 		public ParentNode(RoutableOptions<TContext, TRequest, TResponse> options, SimpleViewOptions<TContext, TRequest, TResponse> viewOptions, string viewName) : base(options, viewOptions) => ViewName = viewName;

@@ -1,31 +1,31 @@
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
-namespace Routable.Kestrel
+namespace Routable.Kestrel;
+
+internal sealed class MicrosoftLoggingLogger : IRoutableLogger
 {
-	internal sealed class MicrosoftLoggingLogger : IRoutableLogger
+	private Microsoft.Extensions.Logging.ILogger Logger;
+
+	public MicrosoftLoggingLogger(Microsoft.Extensions.Logging.ILogger logger) => Logger = logger;
+
+	public void Write(LogClass logClass, string message, Exception exception, IReadOnlyDictionary<string, string> data)
 	{
-		private Microsoft.Extensions.Logging.ILogger Logger;
+		var level = logClass switch {
+			LogClass.Debug => LogLevel.Debug,
+			LogClass.Informational => LogLevel.Information,
+			LogClass.Warning => LogLevel.Warning,
+			LogClass.Error => LogLevel.Error,
+			LogClass.Security => LogLevel.Error,
+			_ => LogLevel.Information
+		};
 
-		public MicrosoftLoggingLogger(Microsoft.Extensions.Logging.ILogger logger) => Logger = logger;
-
-		public void Write(LogClass logClass, string message, Exception exception, IReadOnlyDictionary<string, string> data)
-		{
-			var level = logClass switch {
-				LogClass.Debug => LogLevel.Debug,
-				LogClass.Informational => LogLevel.Information,
-				LogClass.Warning => LogLevel.Warning,
-				LogClass.Error => LogLevel.Error,
-				LogClass.Security => LogLevel.Error,
-				_ => LogLevel.Information
-			};
-
-			if(exception == null) {
-				Logger.Log(level, message);
-			} else {
-				Logger.Log(level, exception, message);
-			}
+		if(exception == null) {
+			Logger.Log(level, message);
+		} else {
+			Logger.Log(level, exception, message);
 		}
 	}
 }
+

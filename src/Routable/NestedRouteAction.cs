@@ -14,7 +14,8 @@ namespace Routable
 		private Func<TContext, TRequest, TResponse, Task<Routing<TContext, TRequest, TResponse>>> Action;
 
 		private NestedRouteAction() { }
-		public async override Task<bool> Invoke(TContext context) {
+		public async override Task<bool> Invoke(TContext context)
+		{
 			// invoke the action and check if we received some routing.
 			var routing = await Action.Invoke(context, context.Request, context.Response);
 			if(routing == null) {

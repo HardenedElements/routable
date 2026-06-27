@@ -1,8 +1,8 @@
-using Routable.Views.Simple.AST;
-using Sprache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Routable.Views.Simple.AST;
+using Superpower;
 
 namespace Routable.Views.Simple
 {
@@ -20,7 +20,7 @@ namespace Routable.Views.Simple
 			ViewOptions = viewOptions;
 		}
 
-		private IEnumerable<Parser<Node<TContext, TRequest, TResponse>>> GetParsers()
+		private IEnumerable<TextParser<Node<TContext, TRequest, TResponse>>> GetParsers()
 		{
 			return new[] {
 				IfSetNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
@@ -33,20 +33,19 @@ namespace Routable.Views.Simple
 				ParentNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions),
 				ChildNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions)
 			}
-			.Concat(ViewOptions.CustomExpressionParsers.Select(_ => _.Select(e => new CustomExpressionNode<TContext, TRequest, TResponse>(Options, ViewOptions, e))))
+			.Concat(ViewOptions.CustomExpressionParsers.Select(_ => _.Select(e => (Node<TContext, TRequest, TResponse>)new CustomExpressionNode<TContext, TRequest, TResponse>(Options, ViewOptions, e))))
 			.Concat(new[] { ContentNode<TContext, TRequest, TResponse>.GetParser(Options, ViewOptions) });
 		}
-		private Parser<IEnumerable<IEnumerable<Node<TContext, TRequest, TResponse>>>> GetParser()
+		private TextParser<Node<TContext, TRequest, TResponse>[]> GetParser()
 		{
-			Parser<Node<TContext, TRequest, TResponse>> current = null;
+			// Each alternative begins by consuming '@'; Try() preserves backtracking across the
+			// alternation since Superpower's Or does not retry once an alternative has consumed input.
+			TextParser<Node<TContext, TRequest, TResponse>> current = null;
 			foreach(var parser in GetParsers()) {
-				if(current == null) {
-					current = parser;
-				} else {
-					current = current.Or(parser);
-				}
+				var alternative = parser.Try();
+				current = current == null ? alternative : current.Or(alternative);
 			}
-			return current.Many().Many();
+			return current.Many();
 		}
 		private IEnumerable<Node<TContext, TRequest, TResponse>> RollupNodes(string name, Node<TContext, TRequest, TResponse>[] symbols, ref int index)
 		{
@@ -89,7 +88,7 @@ namespace Routable.Views.Simple
 			// parse.
 			var parser = GetParser();
 			var index = 0;
-			var symbols = RollupNodes(name, parser.Parse(source).SelectMany(_ => _).ToArray(), ref index);
+			var symbols = RollupNodes(name, parser.Parse(source), ref index);
 
 			// create and cache template.
 			template = new Template<TContext, TRequest, TResponse>(Options, ViewOptions, symbols);

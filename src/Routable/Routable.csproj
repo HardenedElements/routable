@@ -1,16 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageIconUrl>http://www.hardenedelements.com/images/he-icon.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/HardenedElements/routable</PackageProjectUrl>
-    <PackageLicenseUrl>https://www.hardenedelements.com/licenses/MIT-2017.txt</PackageLicenseUrl>
-    <Copyright>Copyright 2017 - Midnight Source Inc.</Copyright>
-    <PackageTags>routable,routing,http</PackageTags>
-    <Authors>Hardened Elements</Authors>
-    <Company>Hardened Elements</Company>
-    <Description>Routable is a simple, easy to use, request routing library. It is platform agnostic and designed to easily integrate with whatever platform you prefer.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.2.0</Version>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<PackageTags>routable,routing,http</PackageTags>
+		<Description>
+			Routable is a simple, easy to use, request routing library. It is platform agnostic
+			and designed to easily integrate with whatever platform you prefer.
+		</Description>
+	</PropertyGroup>
 </Project>
